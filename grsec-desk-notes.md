@@ -14,6 +14,9 @@ Polkit 需要通过访问 /proc 获得 Agent 或者请求提权的进程的信�
 
 请将 polkitd 用户加入 /proc 豁免的组。
 
+FIXME: 在桌面系统上阻止普通用户访问 /proc 真的是好主意么？PaX Team
+自己不这么认为。
+
 而且， polkitd 属于滥用 Javascript 的程序之一。别忘了给它放开 MPROTECT。
 
 ## Mesa
