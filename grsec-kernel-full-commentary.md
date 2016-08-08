@@ -3,6 +3,19 @@
 
 **注意：不要盲目听信“建议”！适合的才是最好的！**
 
+## → General Setup --->
+
+#### [\*] GCC Plugins ---
+
+很多 PaX 加固特性使用 GCC Plugins 作为一个 "Code filter"。
+
+如果你发现下面的一些 PaX 特性没有出现，可以试试打开这里。
+
+注意：打开这里意味着你需要安装 GCC 插件头文件。很多发行版将这些头文件拆成了一个单独
+的软件包。
+
+\ 另外该框架已被并入 Linux 4.8 中！感谢 KSPP！ /
+
 ## → Security options → Grsecurity --->
 
 #### [\*] Grsecurity
