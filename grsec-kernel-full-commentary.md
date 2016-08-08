@@ -483,7 +483,7 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 
 ### [\*] Deny new USB connections after toggle
 
-开启这个选项，让 PaX 在你设置 `deny_new_usb` 这个 sysctl 后进行任何 USB 连接，防止恶意者
+开启这个选项，让 PaX 在你设置 `deny_new_usb` 这个 sysctl 后禁止任何 USB 连接，防止恶意者
 使用 BadUSB 攻击。这个功能是由用户决定何时开启的，因此不会对系统造成任何影响，如果用户
 自己开启了这个 sysctl 他也显然知道自己在做什么。
 
