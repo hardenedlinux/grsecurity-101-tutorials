@@ -375,6 +375,27 @@ Details are *TODO* now.
 
 ## → Customize Configuration → Filesystem Protections --->
 
+
+### [  ] Proc restrictions
+
+关闭这个选项，否则普通用户不能看到其他用户的进程。这是个非常好的特性，强烈建议服务器开启，但在桌面上
+会导致许多问题，比如不能使用系统监视器。
+
+### [  ] Sysfs/debugfs restriction
+
+TODO: 在 Tom Li 的机器上是关闭的，和什么程序冲突来着？
+
+### [\*] Chroot jail restrictions
+
+选择 Y，让 PaX 对 Linux 本来不怎么安全却被当作安全措施的 chroot() 进行加固。
+注意，Lennartware 特别喜欢用 chroot()，然而 PaX 的阉割版 chroot() 却不能让
+Lannertware 正常运行了。不过这些子选项都是可以开启的，毕竟都能 sysctl 控制。
+
+值得注意的选项有：
+* Protect outside processes  （<- 阻止 Lennartware 访问 chroot 外的进程）
+* Restrict priority changes （<- 阻止 rtkit 修改程序优先级）
+* Capability restrictions （<- 剥夺了 Lennartware 程序的一些特权）
+
 ## → Customize Configuration → Kernel Auditing --->
 
 **除了这些选项，其他的都可以开启**
