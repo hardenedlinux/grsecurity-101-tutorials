@@ -33,9 +33,9 @@ PaX 自带进行「安全」和「性能」两种自带配置集合。但是如�
 
 #### Virtualization Type --->
 
-- None (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_NONE)
-- Guest (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_GUEST)
-- Host (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_HOST)
+- None
+- Guest
+- Host
 
 根据虚拟化的场景选择就好啦~
 
