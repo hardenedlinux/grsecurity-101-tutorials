@@ -1,5 +1,7 @@
 # PaX 基础
 
+注：本文档针对暂时不考虑自行编译内核的新手。 （然而要玩转 PaX 的话早晚是要重新编译内核的  ;-) ）
+
 PaX 是 Grsecurity 里专注于 Memory corruption 的部分。
 
 ## PaX 特性介绍
@@ -43,16 +45,6 @@ EMUTRAMP 特性是对早期 Linux 程序滥用 trampolines 的一种 workaround�
 
 现代 Linux Userspace 已经几乎很少依赖 trampolines 。
 
-### KERNEXEC (Enforce non-executable kernel pages)
-
-相对于上面的用户空间内存执行防护，KERNEXEC 是对内核空间的内存执行防护。
-
-KERNEXEC 一般不会对正常使用造成影响，但是会大大提升通过内核漏洞提权的难度。
-
-注意：KERNEXEC 有多种实现，但是这些实现要么需要 GCC Plugins ，要么需要 Sandy Bridge 以上的处理器（使用 SMEP）。
-
-在编译内核的时候，需要选择使用的实现。请谨慎考虑！
-
 ### ASLR (Address Space Layout Randomization)
 
 ASLR ，是一项著名的用户控件防代码注入技术。
@@ -63,22 +55,7 @@ ASLR 的性能影响比较小，但是带来的安全性增强非常高。
 
 PIE 程序代码段加载地址的随机化已经在主线内核中实现多时了，但是 PaX 包含了更多的随机化功能。
 
-PaX 特有的 ASLR 包括多部分：
-
-- RANDKSTACK ， 随机化内核栈，从而避免代码被注入到内核当中
-- RANDMMAP ， 随机化用户栈以及 mmap() 系统调用的基址，从而能够使得动态库的地址随机化，避免动态库里的代码被利用。
-
-### GCC Plugins
-
-PaX/Grsecurity 为了实现极致的安全性，在内核编译过程中，加入了大量的 GCC Plugins 对内核代码进行自动化处理。
-
-上面提到的 KERNEXEC 实现即为一例。
-
-注：GCC Plugins 框架已于 4.8 加入 Linux 主线内核，各个 Plugin 正在逐渐向主线推送。将来主线也能享受 GCC Plugins 带来的加固。
-
-### 其他杂项特性
-
-其他杂项 PaX 加固特性，将于 《面向桌面的 PaX/Grsecurity 配置详细注释与评论》 中介绍。
+对用户空间程序影响较大的主要是 RANDMMAP ，其作用是随机化用户栈以及 mmap() 系统调用的基址，从而能够使得动态库的地址随机化，避免动态库里的代码被利用。但是，部分程序可能无法接受随机化的 MMAP 基址，所以需要用 PaX Flags 关闭之。
 
 ## PaX 可执行文件标记
 
