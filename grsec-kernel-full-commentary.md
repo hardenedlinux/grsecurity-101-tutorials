@@ -441,8 +441,53 @@ Details are *TODO* now.
 
 ## → Customize Configuration → Network Protections --->
 
+### [\*] TCP/UDP blackhole and LAST_ACK DoS prevention
+
+开启这个选项，让 PaX 对发送到没有任何程序监听端口的 ICMP 或者 TCP Reset 包无动于衷。这可以
+防止许多无谓的端口扫描或 DoS 攻击。
+
+### [\*] Disable TCP Simultaneous Connect
+
+开启这个选项，让 PaX 禁用 Linux 内核的 TCP Simultaneous Connect 支持。在 TCP 中，两个程序
+不需要进行端口监听，在极短的时间瞬间连接对方也可以建立一条连接，并被 Linux 内核所支持，
+可以用来编写内网穿透等有趣的程序。然而，这个特性也可以被攻击者用来阻止程序正常连接服务器，
+比如病毒库在线更新、证书吊销服务器等，再加上没有什么人知道 TCP 还有这么个功能，其他操作系统
+也不支持。所以可以禁用 TCP Simultaneous Connect。
+
+### [\*] Socket restrictions
+
+关闭这个选项，否则 PaX 可以让你限制用户组里的某些用户使用 socket。在桌面系统中意义不大。
+
 ## → Customize Configuration → Physical Protections --->
+
+### [\*] Deny new USB connections after toggle
+
+开启这个选项，让 PaX 在你设置 `deny_new_usb` 这个 sysctl 后进行任何 USB 连接，防止恶意者
+使用 BadUSB 攻击。这个功能是由用户决定何时开启的，因此不会对系统造成任何影响，如果用户
+自己开启了这个 sysctl 他也显然知道自己在做什么。
+
+### [  ] Reject all USB devices not connected at boot
+
+关闭这个选项，否则 PaX 会禁止任何启动时没有连接在机器上的 USB 设备。这对于需要使用 USB 硬件
+而不能完全禁用 USB 的服务器很有用，但对桌面系统没有意义。
 
 ## → Customize Configuration → Sysctl Support --->
 
+### [\*] Sysctl support
+
+开启这个选项，允许通过 sysctl 控制 PaX 的某些特性。
+
+### [\*] Turn on features by default
+
+开启这个选项，让 PaX 可以通过 sysctl 开启的选项都默认开启，这样我们只需要禁用有问题的特性，
+而不用在 sysctl 里说废话。
+
 ## → Customize Configuration → Logging Options --->
+
+### (10) Seconds in between log messages (minimum)
+
+两个 PaX 日志之间至少间隔 10 秒，避免内核日志被刷爆。
+
+### (6) Number of messages in a burst (maximum)
+
+当日志发洪水的时候，最多产生 6 条日志，避免内核日志爆炸。
