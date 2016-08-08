@@ -1,4 +1,4 @@
-# MPROTECT 误杀的程序
+# MPROTECT 阻止的程序
 
 - Java VM
 - Python Interpreter

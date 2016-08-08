@@ -31,9 +31,9 @@ MPROTECT 特性，彻底阻断了程序实时生成可以执行的代码的途�
 
 参见 [《MPROTECT早期设计文档》](http://hardenedlinux.org/system-security/2016/03/14/mprotect.html)
 
-MPROTECT 误杀的程序比较多，所有使用 JIT 技术的程序都无法幸免于难，包括各种浏览器以及各种 JavaScript 滥用者。
+MPROTECT 阻止的程序比较多，所有使用 JIT 技术的程序都无法幸免于难，包括各种浏览器以及各种 JavaScript 滥用者。
 
-[MPROTECT 误杀的程序列表](mprotect-victim.md)
+[MPROTECT 阻止的程序列表](mprotect-victim.md)
 
 ### EMUTRAMP (Emulate trampolines)
 
