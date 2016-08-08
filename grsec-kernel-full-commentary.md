@@ -358,6 +358,52 @@ Details are *TODO* now.
 
 ## → Customize Configuration → Filesystem Protections --->
 
+#### [\*] Proc restrictions
+
+建议选择 Y。这个选项可以减少未授权用户对其他用户的 /proc 项的访问，从而避免发现其他用户的进程。
+
+#### [ ] Restrict /proc to user only
+
+建议选择 N。选择这个选项之后，将不允许设置下面的“豁免组”，从而影响一些应用。
+
+#### [\*] Allow special group
+
+建议选择 Y。一些 daemon 需要获取全部用户的进程信息（比如 PolicyKit 需要获取请求权限的进程的 PID 以确定用户），对于
+这些 daemon ，我们可以把运行它们的用户放入一个特殊豁免组。
+
+#### (A special GID) GID for special group
+
+这里填写一个 GID ，作为豁免组。
+
+个人认为默认值 1001 并不好。（在发行版实践中，我为这个组分配了一个系统级 GID）
+
+#### [?] Additional restrictions
+
+谨慎考虑。选择 Y 以后，/proc 里一些可能泄露系统信息的文件，会被限制为 Root-only。这会增强安全性，但是会减少便利性。
+
+对于桌面用户而言，这些额外的限制未必必要，反而可能带来麻烦。
+
+#### [\*] Linking restrictions
+
+选择这个之后，/tmp 内的符号链接，将只被该符号链接的所有者 follow。这样可以避免一些对 /tmp 进行权限设置的脚本
+遭到提权攻击。
+
+该选项可在运行时通过 kernel.grsecurity.linking\_restrictions sysctl 开关。
+
+#### [ ] Kernel-enforced SymlinksIfOwnerMatch
+
+
+
+#### [\*] FIFO restrictions
+
+#### [ ] Sysfs/debugfs restriction
+
+#### [ ] Runtime read-only mount protection
+
+#### [\*] Eliminate stat/notify-based device sidechannels
+
+#### [ ] Chroot jail restrictions
+
 ## → Customize Configuration → Kernel Auditing --->
 
 ## → Customize Configuration → Executable Protections --->
