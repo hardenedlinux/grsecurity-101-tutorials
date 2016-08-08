@@ -14,7 +14,7 @@ Polkit 需要通过访问 /proc 获得 Agent 或者请求提权的进程的信�
 
 如果你启用了 /proc 限制，请将 polkitd 用户加入 /proc 豁免的组。
 
-而且， polkitd 属于滥用 Javascript 的程序之一。要么给它准备一个 js185 ，要么给它
+而且， polkitd 属于滥用 Javascript 的程序之一。要么给它准备一个 js185 （无 JIT），要么给它
 放开 MPROTECT 权限吧。
 
 ## Mesa
