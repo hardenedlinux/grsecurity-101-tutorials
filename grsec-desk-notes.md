@@ -19,6 +19,11 @@ FIXME: 在桌面系统上阻止普通用户访问 /proc 真的是好主意么？
 
 而且， polkitd 属于滥用 Javascript 的程序之一。别忘了给它放开 MPROTECT。
 
+FIXME: polkitd 使用 spidermonkey 执行 JavaScript，似乎在典型的系统上只有 polkitd
+才会用 spidermonkey，浏览器都不用了，而且对于 polkitd 这么关键的程序，再加上它
+所使用的那么一点点 JavaScript，关闭 spidermonkey 的 JIT 而不是放开 mprotect 是
+更好的选择。
+
 ## Mesa
 
 x86_32 版本 Mesa 的 libGL 使用了一个自修改代码的优化，会与 MPROTECT 冲突。
