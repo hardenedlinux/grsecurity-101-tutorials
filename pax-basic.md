@@ -17,7 +17,7 @@ PAGEEXEC 特性，通过处理器的分页机制，实现了对执行数据段�
 
 ### SEGMEXEC (Segmentation based non-executable pages)
 
-SEGMEXEC 特性，同样避免了对数据段内代码的执行。与 PAGEEXEC 不同，它是通过 x86_32 的分段特性实现的，所以仅适用于 x86_32 。
+SEGMEXEC 特性，同样避免了对数据段内代码的执行。与 PAGEEXEC 不同，它是通过 x86\_32 的分段特性实现的，所以仅适用于 x86\_32 。
 
 参见 [《SEGMEXEC设计文档》](http://hardenedlinux.org/system-security/2015/05/26/segmexec.html)
 
@@ -84,15 +84,15 @@ PaX/Grsecurity 为了实现极致的安全性，在内核编译过程中，加�
 
 当前标记方式有三种：
 
-- EI_PAX ，通过修改 ELF 文件头进行标记，与新的 GNU 工具链兼容性存在问题，现在可以不予考虑，除非你要去考古旧系统 ;-)
-- PT_PAX ，通过在 ELF 文件里加入特殊段进行标记，是 EI_PAX 的继任者，但是仍然需要修改 ELF 文件，对于某些需要检验自身校验和的程序会造成问题（如 Skype 客户端），而且需要给 binutils 打补丁……
-- XATTR_PAX ，新一代 PaX 标记方案（笑）！使用文件系统的 XATTR 进行 PaX 标记，再无修改 ELF 文件的忧虑。然而需要一个支持 XATTR 的文件系统……
+- EI\_PAX ，通过修改 ELF 文件头进行标记，与新的 GNU 工具链兼容性存在问题，现在可以不予考虑，除非你要去考古旧系统 ;-)
+- PT\_PAX ，通过在 ELF 文件里加入特殊段进行标记，是 EI\_PAX 的继任者，但是仍然需要修改 ELF 文件，对于某些需要检验自身校验和的程序会造成问题（如 Skype 客户端），而且需要给 binutils 打补丁……
+- XATTR\_PAX ，新一代 PaX 标记方案（笑）！使用文件系统的 XATTR 进行 PaX 标记，再无修改 ELF 文件的忧虑。然而需要一个支持 XATTR 的文件系统……
 
 单文件标记工具也有三种：
 
-- chpax ，古旧的标记工具，仅支持 EI_PAX 。你不需要使用它，除非是要考古。
-- paxctl ，支持 PT_PAX 的标记。（然而 XATTR_PAX 将会是趋势……）
-- paxctl-ng (elfix) ，支持 PT_PAX 和 XATTR_PAX 。（相比之下更好用一些）
+- chpax ，古旧的标记工具，仅支持 EI\_PAX 。你不需要使用它，除非是要考古。
+- paxctl ，支持 PT\_PAX 的标记。（然而 XATTR\_PAX 将会是趋势……）
+- paxctl-ng (elfix) ，支持 PT\_PAX 和 XATTR\_PAX 。（相比之下更好用一些）
 
 标记的各个 Flag 有：
 
