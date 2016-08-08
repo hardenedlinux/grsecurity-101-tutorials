@@ -346,3 +346,26 @@ fork()，以避免某些程序以不断 fork() 的形式利用某个漏洞。这
 建议选择 Y，这会让 PaX 在怀疑某程序尝试入侵内核时，准确的说是 KERNEXEC/UDEREF/USERCOPY 保护触发，
 或者内核访问内存但 kernel oops 时，杀死此程序主人所有的进程，并且禁止任何新进程创建，换句话说，
 就是封禁该用户，直到重启；如果此用户是 root，那么 PaX 将触发 kernel panic 让内核自杀。
+
+## → Customize Configuration → Role Based Access Control Options --->
+
+Details are *TODO* now.
+
+#### [\*] Disable RBAC system
+
+建议选择 Y。Grsecurity 的 RBAC 是一个大型权限控制系统，需要以死亡无数脑细胞为代价学习其使用。在那之前，
+启动它只能为黑客限制你的行为留下一个后门。
+
+## → Customize Configuration → Filesystem Protections --->
+
+## → Customize Configuration → Kernel Auditing --->
+
+## → Customize Configuration → Executable Protections --->
+
+## → Customize Configuration → Network Protections --->
+
+## → Customize Configuration → Physical Protections --->
+
+## → Customize Configuration → Sysctl Support --->
+
+## → Customize Configuration → Logging Options --->
