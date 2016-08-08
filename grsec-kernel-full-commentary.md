@@ -375,16 +375,23 @@ Details are *TODO* now.
 
 ## → Customize Configuration → Filesystem Protections --->
 
-### [  ] Proc restrictions
+#### [  ] Proc restrictions
 
 关闭这个选项，否则普通用户不能看到其他用户的进程。这是个非常好的特性，强烈建议服务器开启，但在桌面上
 会导致许多问题，比如不能使用系统监视器。
 
-### [  ] Sysfs/debugfs restriction
+#### [\*] Linking restrictions
+
+选择这个之后，/tmp 内的符号链接，将只被该符号链接的所有者 follow。这样可以避免一些对 /tmp 进行权限设置的脚本
+遭到提权攻击。
+
+该选项可在运行时通过 kernel.grsecurity.linking\_restrictions sysctl 开关。
+
+#### [  ] Sysfs/debugfs restriction
 
 TODO: 在 Tom Li 的机器上是关闭的，和什么程序冲突来着？
 
-### [\*] Chroot jail restrictions
+#### [\*] Chroot jail restrictions
 
 选择 Y，让 PaX 对 Linux 本来不怎么安全却被当作安全措施的 chroot() 进行加固。
 注意，Lennartware 特别喜欢用 chroot()，然而 PaX 的阉割版 chroot() 却不能让
@@ -402,28 +409,28 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 
 **除了这些选项，其他的都可以开启**
 
-### [  ] Single group for auditing
+#### [  ] Single group for auditing
 
 由于下文将提到的三个选项将产生海量日志，因此 PaX 可以仅仅对某一个用户组开启下面的三类日志，
 用于监视可疑的用户而内核日志不会发洪水。在桌面系统上，这个选项没有意义。
 
-### [  ] Exec logging
+#### [  ] Exec logging
 
 不要开启这个选项，否则 PaX 会将所有 exec\*() 全部都记录在内核日志中。这是程序执行受控的特殊环境中
 用来做安全审计的，不是面向服务器或桌面的。
 
-### [  ] Log execs within chroot
+#### [  ] Log execs within chroot
 
 不要开启这个选项，否则 PaX 会将 chroot() 环境中的所有 exec\*() 全部都记录在内核日志中。这个选项本来
 无所谓，因为平时几乎不会使用 chroot，但 Lennartware 都会使用 chroot() 加固自身，于是……
 
-### [  ] Chdir logging
+#### [  ] Chdir logging
 
 不要开启这个选项，否则 PaX 会将 chdir() 全部记录在内核里。Lennartware 都会使用 chdir() 加固自身，于是……
 
 ## → Customize Configuration → Executable Protections --->
 
-### [\*] Dmesg(8) restriction
+#### [\*] Dmesg(8) restriction
 
 强烈开启这个选项，让 PaX 禁止非 root 查看 dmesg 得到有用信息来攻击系统。注意：如果你的 systemd-journal 依然
 允许普通用户查看 dmesg，这个选项你就白开启了！别忘了禁止 systemd-journal 给普通用户提供 dmesg！
@@ -436,40 +443,40 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 
 可以用 sysctl 关闭。
 
-### [\*] Require read access to ptrace sensitive binaries
+#### [\*] Require read access to ptrace sensitive binaries
 
 开启这个选项，让 PaX 禁止用户 ptrace() 自己连读程序本体二进制都没权限的进程，如果有用户这么做多半是要干
 坏事。可以 sysctl 关闭。
 
-### [\*] Enforce consistent multithreaded privileges
+#### [\*] Enforce consistent multithreaded privileges
 
 开启这个选项，让 PaX 将多进程程序共享 gid 和 capabilities 等权限信息。glibc 会对所有程序都自动做这样的处理，
 但其他 libc 可能没有这个功能，再者 glibc 可能会出问题，因此我们可以让 PaX 帮助我们完成这项任务。可以 sysctl
 关闭。
 
-### [\*] Disallow access to overly-permissive IPC objects
+#### [\*] Disallow access to overly-permissive IPC objects
 
 开启这个选项，让 PaX 禁止权限宽松到离谱的 IPC 被访问，以免 buggy 的 IPC 程序被攻击。但同时允许有 `CAP_IPC_OWNER`
 权限的进程这么做。我从没见过这个特性导致问题，推荐开启。可以 sysctl 关闭。
 
-### [\*] Disallow unprivileged use of command injection
+#### [\*] Disallow unprivileged use of command injection
 
 开启这个选项，让 PaX 禁止普通用户使用 TIOCSTI 这个 ioctl() 将命令注入到 tty 中。这种行为几乎没有任何合情合理的使用，
 而在历史上则被用来劫持 su 等程序。建议开启。可以 sysctl 关闭。
 
-### [  ] Trusted Path Execution
+#### [  ] Trusted Path Execution
 
 关闭这个选项，否则 PaX 可以将某个用户组标记为可疑用户组，禁止这些用户执行所有者不是 root 的程序。换句话说就是禁止他们
 执行非系统自带的程序。这在服务器上是有用的，但在桌面上则会禁止用户执行任何自己的程序。
 
 ## → Customize Configuration → Network Protections --->
 
-### [\*] TCP/UDP blackhole and LAST_ACK DoS prevention
+#### [\*] TCP/UDP blackhole and LAST_ACK DoS prevention
 
 开启这个选项，让 PaX 对发送到没有任何程序监听端口的 ICMP 或者 TCP Reset 包无动于衷。这可以
 防止许多无谓的端口扫描或 DoS 攻击。
 
-### [\*] Disable TCP Simultaneous Connect
+#### [\*] Disable TCP Simultaneous Connect
 
 开启这个选项，让 PaX 禁用 Linux 内核的 TCP Simultaneous Connect 支持。在 TCP 中，两个程序
 不需要进行端口监听，在极短的时间瞬间连接对方也可以建立一条连接，并被 Linux 内核所支持，
@@ -477,40 +484,40 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 比如病毒库在线更新、证书吊销服务器等，再加上没有什么人知道 TCP 还有这么个功能，其他操作系统
 也不支持。所以可以禁用 TCP Simultaneous Connect。
 
-### [  ] Socket restrictions
+#### [  ] Socket restrictions
 
 关闭这个选项，否则 PaX 可以让你限制用户组里的某些用户使用 socket。在桌面系统中意义不大。
 
 ## → Customize Configuration → Physical Protections --->
 
-### [\*] Deny new USB connections after toggle
+#### [\*] Deny new USB connections after toggle
 
 开启这个选项，让 PaX 在你设置 `deny_new_usb` 这个 sysctl 后禁止任何 USB 连接，防止恶意者
 使用 BadUSB 攻击。这个功能是由用户决定何时开启的，因此不会对系统造成任何影响，如果用户
 自己开启了这个 sysctl 他也显然知道自己在做什么。
 
-### [  ] Reject all USB devices not connected at boot
+#### [  ] Reject all USB devices not connected at boot
 
 关闭这个选项，否则 PaX 会禁止任何启动时没有连接在机器上的 USB 设备。这对于需要使用 USB 硬件
 而不能完全禁用 USB 的服务器很有用，但对桌面系统没有意义。
 
 ## → Customize Configuration → Sysctl Support --->
 
-### [\*] Sysctl support
+#### [\*] Sysctl support
 
 开启这个选项，允许通过 sysctl 控制 PaX 的某些特性。
 
-### [\*] Turn on features by default
+#### [\*] Turn on features by default
 
 开启这个选项，让 PaX 可以通过 sysctl 开启的选项都默认开启，这样我们只需要禁用有问题的特性，
 而不用在 sysctl 里说废话。
 
 ## → Customize Configuration → Logging Options --->
 
-### (10) Seconds in between log messages (minimum)
+#### (10) Seconds in between log messages (minimum)
 
 两个 PaX 日志之间至少间隔 10 秒，避免内核日志被刷爆。
 
-### (6) Number of messages in a burst (maximum)
+#### (6) Number of messages in a burst (maximum)
 
 当日志发洪水的时候，最多产生 6 条日志，避免内核日志爆炸。
