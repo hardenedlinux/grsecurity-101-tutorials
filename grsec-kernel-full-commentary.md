@@ -454,7 +454,7 @@ Details are *TODO* now.
 比如病毒库在线更新、证书吊销服务器等，再加上没有什么人知道 TCP 还有这么个功能，其他操作系统
 也不支持。所以可以禁用 TCP Simultaneous Connect。
 
-### [\*] Socket restrictions
+### [  ] Socket restrictions
 
 关闭这个选项，否则 PaX 可以让你限制用户组里的某些用户使用 socket。在桌面系统中意义不大。
 
