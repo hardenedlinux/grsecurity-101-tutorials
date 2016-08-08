@@ -5,7 +5,7 @@
 
 ## → Security options → Grsecurity --->
 
-#### [\*] Grsecurity (CONFIG\_GRKERNSEC)
+#### [\*] Grsecurity
 
 强烈建议选择 Y。
 
@@ -136,6 +136,24 @@ XATTR\_PAX 现在被广泛使用。
 这个特性威力很强大，但是也很容易影响使用，可能需要给大量程序设置例外。
 
 所以，请三思。请三思。请三思。
+
+*注：以上三个选项可以参见 [《PaX 基础》](pax-basic.md)*
+
+#### [ ] Use legacy/compat protection demoting (read help)
+
+建议选择 N。又是一个对旧系统+缺陷代码的 workaround 。
+
+#### [ ] Allow ELF text relocations (read help)
+
+建议选择 N。除非你有 x86\_32 的非 PIC 动态库需要使用。（这些库需要 relocation）
+
+#### [ ] Enforce non-executable kernel pages
+
+谨慎选择，可能有坑。
+
+相当于内核里的 MPROTECT 和 PAGEEXEC，但是有些内核代码需要这种机制。
+
+如果出了问题，试试关掉它吧。
 
 ### → Miscellaneous hardening features --->
 
