@@ -57,9 +57,16 @@ KERNEXEC 一般不会对正常使用造成影响，但是会大大提升通过�
 
 ASLR ，是一项著名的用户控件防代码注入技术。
 
-它能够使用户空间程序（前提程序文件应该是 PIE (Position Independent Executable)）的加载地址随机化，导致难以确定代码应该插入的位置。
+它能够使用户空间程序（前提程序文件应该是 PIE (Position Independent Executable)）的地址随机化，导致难以确定代码应该插入的位置。
 
-ASLR 的性能影响很小，但是带来的安全性增强非常高。
+ASLR 的性能影响比较小，但是带来的安全性增强非常高。
+
+PIE 程序代码段加载地址的随机化已经在主线内核中实现多时了，但是 PaX 包含了更多的随机化功能。
+
+PaX 特有的 ASLR 包括多部分：
+
+- RANDKSTACK ， 随机化内核栈，从而避免代码被注入到内核当中
+- RANDMMAP ， 随机化用户栈以及 mmap() 系统调用的基址，从而能够使得动态库的地址随机化，避免动态库里的代码被利用。
 
 ### GCC Plugins
 
@@ -76,3 +83,21 @@ PaX/Grsecurity 为了实现极致的安全性，在内核编译过程中，加�
 需要 PaX 特许的可执行文件需要被进行标记。
 
 当前标记方式有三种：
+
+- EI_PAX ，通过修改 ELF 文件头进行标记，与新的 GNU 工具链兼容性存在问题，现在可以不予考虑，除非你要去考古旧系统 ;-)
+- PT_PAX ，通过在 ELF 文件里加入特殊段进行标记，是 EI_PAX 的继任者，但是仍然需要修改 ELF 文件，对于某些需要检验自身校验和的程序会造成问题（如 Skype 客户端），而且需要给 binutils 打补丁……
+- XATTR_PAX ，新一代 PaX 标记方案（笑）！使用文件系统的 XATTR 进行 PaX 标记，再无修改 ELF 文件的忧虑。然而需要一个支持 XATTR 的文件系统……
+
+单文件标记工具也有三种：
+
+- chpax ，古旧的标记工具，仅支持 EI_PAX 。你不需要使用它，除非是要考古。
+- paxctl ，支持 PT_PAX 的标记。（然而 XATTR_PAX 将会是趋势……）
+- paxctl-ng (elfix) ，支持 PT_PAX 和 XATTR_PAX 。（相比之下更好用一些）
+
+标记的各个 Flag 有：
+
+- P 启用 PAGEEXEC ， p 禁用 PAGEEXEC （默认值为 P）
+- E 启用 EMUTRAMP ， e 禁用 EMUTRAMP （默认值为 e）
+- M 启用 MPROTECT ， m 禁用 MPROTECT （默认值为 M）
+- R 启用 RANDMMAP ， r 禁用 RANDMMAP （默认值为 R）
+- S 启用 SEGMEXEC ， s 禁用 SEGMEXEC （默认值为 S）
