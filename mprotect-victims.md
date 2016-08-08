@@ -14,3 +14,5 @@
 
 - Amarok
 - QEMU System Emulation
+
+- Mesa LLVMPipe 软件渲染引擎 （因为使用了 JIT 技术）
