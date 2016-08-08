@@ -10,7 +10,7 @@ PaX 是 Grsecurity 里专注于 Memory corruption 的部分。
 
 PAGEEXEC 特性，通过处理器的分页机制，实现了对执行数据段内的代码的防护。
 
-参见 [《PAGEEXEC的最早设计文档》](http://hardenedlinux.org/system-security/2015/05/25/pageexec-old.html)
+参见 [《PAGEEXEC的最早设计文档》](https://hardenedlinux.github.io/system-security/2015/05/25/pageexec-old.html)
 
 一般的程序不会被 PAGEEXEC 影响。但是少数程序会执行被 PAGEEXEC 禁止的操作：
 
@@ -21,7 +21,7 @@ PAGEEXEC 特性，通过处理器的分页机制，实现了对执行数据段�
 
 SEGMEXEC 特性，同样避免了对数据段内代码的执行。与 PAGEEXEC 不同，它是通过 x86\_32 的分段特性实现的，所以仅适用于 x86\_32 。
 
-参见 [《SEGMEXEC设计文档》](http://hardenedlinux.org/system-security/2015/05/26/segmexec.html)
+参见 [《SEGMEXEC设计文档》](https://hardenedlinux.github.io/system-security/2015/05/26/segmexec.html)
 
 笔者并没有用过 SEGMEXEC ，所以也不知道会有多少程序出问题。
 
@@ -31,7 +31,7 @@ SEGMEXEC 特性，同样避免了对数据段内代码的执行。与 PAGEEXEC �
 
 MPROTECT 特性，彻底阻断了程序实时生成可以执行的代码的途径，保证了程序的运行不会超出现有代码。
 
-参见 [《MPROTECT早期设计文档》](http://hardenedlinux.org/system-security/2016/03/14/mprotect.html)
+参见 [《MPROTECT早期设计文档》](https://hardenedlinux.github.io/system-security/2016/03/14/mprotect.html)
 
 MPROTECT 阻止的程序比较多，所有使用 JIT 技术的程序都无法幸免于难，包括各种浏览器以及各种 JavaScript 滥用者。
 
