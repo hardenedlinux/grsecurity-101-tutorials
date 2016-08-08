@@ -14,8 +14,8 @@
 
 #### Configuration Method --->
 
-- Automatic (CONFIG\_GRKERNSEC\_CONFIG\_AUTO)
-- Custom (CONFIG\_GRKERNSEC\_CONFIG\_CUSTOM)
+- Automatic
+- Custom
 
 PaX 自带进行「安全」和「性能」两种自带配置集合。但是如果你愿意的话，
 还是可以自行从头配置。
@@ -26,8 +26,8 @@ PaX 自带进行「安全」和「性能」两种自带配置集合。但是如�
 
 #### Usage Type --->
 
-- Server (CONFIG\_GRKERNSEC\_CONFIG\_SERVER)
-- Desktop (CONFIG\_GRKERNSEC\_CONFIG\_DESKTOP)
+- Server
+- Desktop
 
 就按照英文的意思选就行啦~
 
@@ -41,8 +41,8 @@ PaX 自带进行「安全」和「性能」两种自带配置集合。但是如�
 
 #### Virtualization Hardware --->
 
-- EPT/RVI Processor Support (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_EPT)
-- First-gen/No Hardware Virtualization (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_SOFT)
+- EPT/RVI Processor Support
+- First-gen/No Hardware Virtualization
 
 前一个选项会启用一些对新式虚拟化技术特别的优化，但是后一个选项则是追求稳妥。
 
@@ -52,11 +52,11 @@ PaX 自带进行「安全」和「性能」两种自带配置集合。但是如�
 
 #### Virtualization Software --->
 
-- Xen (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_XEN)
-- VMware (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_VMWARE)
-- KVM (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_KVM)
-- VirtualBox (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_VIRTUALBOX)
-- Hyper-V (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_HYPERV)
+- Xen
+- VMware
+- KVM
+- VirtualBox
+- Hyper-V
 
 根据你要用到的虚拟化软件选择。
 
@@ -105,7 +105,15 @@ XATTR\_PAX 现在被广泛使用。
 
 *注：以上三个选项可以参见 [《PaX 基础》](pax-basic.md)*
 
+#### MAC system integration --->
 
+- none
+- direct
+- hook
+
+与 MAC 系统的整合选项。
+
+如果要在 Grsecurity 之外另外使用其他 MAC 系统，则需要按照 MAC 系统的要求选择对应选项。
 
 ### → Miscellaneous hardening features
 
