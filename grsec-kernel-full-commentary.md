@@ -103,7 +103,9 @@ PT\_PAX 现在依然处于被支持状态喔~
 
 XATTR\_PAX 现在被广泛使用。
 
-*注：可以参见 [《PaX 基础》](pax-basic.md)*
+*注：以上三个选项可以参见 [《PaX 基础》](pax-basic.md)*
+
+
 
 ### → Miscellaneous hardening features
 
