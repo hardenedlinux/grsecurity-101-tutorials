@@ -10,3 +10,4 @@ Grsecurity 使用的技术手段包括智能访问控制、通过防御内存破
 
 - [开始使用 Grsecurity](start-using-grsec.md)
 - [PaX 基础](pax-basic.md)
+- [面向桌面发行版的 PaX/Grsecurity 配置详细注释与评论](grsec-kernel-full-commentary.md)
