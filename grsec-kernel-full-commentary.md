@@ -141,19 +141,24 @@ XATTR\_PAX 现在被广泛使用。
 
 #### [ ] Use legacy/compat protection demoting (read help)
 
-建议选择 N。又是一个对旧系统+缺陷代码的 workaround 。
+建议选择 N。又是一个对旧系统+缺陷代码的 workaround。注意，如果你使用 Nvidia 私有驱动，
+那么如果不选择此选项，可能需要将**每一个**用到 OpenGL 的程序都进行标记，因此你可能希望
+选择，但具体是否选择前应该进行测试。
 
 #### [ ] Allow ELF text relocations (read help)
 
 建议选择 N。除非你有 x86\_32 的非 PIC 动态库需要使用。（这些库需要 relocation）
+注意，如果你使用 Nvidia 私有驱动，那么如果不选择此选项，可能需要将**每一个**用到
+OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否选择前应该进行测试。
+
 
 #### [?] Enforce non-executable kernel pages
 
-谨慎选择，可能有坑。
+相当于内核里的 MPROTECT 和 PAGEEXEC，在绝大多数服务器和桌面上可以安全开启此特性，
+但有些内核代码，特别是第三方内核模块需要这种机制，尤其是 VirtualBox。
 
-相当于内核里的 MPROTECT 和 PAGEEXEC，但是有些内核代码需要这种机制。
-
-如果出了问题，试试关掉它吧。
+另外，在 EFI 系统上，EFI 部分内存总是可以执行的，这会削弱该特性的保护效果，
+如果你非常在意这个问题，你可以使用 noefi 参数启动系统，禁用内核的 EFI 支持。
 
 #### Code Pointer Instrumentation Method --->
 
@@ -231,8 +236,8 @@ XATTR\_PAX 现在被广泛使用。
 严防途中出现疏漏。这些保护措施几乎不会导致任何性能损失。
 
 然而，这会导致第三方内核不能通过检查，需要修改。明显了两个例子是 ZFS 与 nvidia-drivers，前者
-得到了官方上游支持，后者得到了 PaX Team 的支持。但对于其他补丁和模块就没有办法了。然而使用
-PaX 内核本身，你显然已经做好了不使用这些模块的准备。
+得到了官方上游支持，后者得到了 PaX Team 的支持，另外 VirtualBox 模块也得到了 PaX Team 的补丁
+支持。但对于其他补丁和模块就没有办法了。然而使用PaX 内核本身，你显然已经做好了不使用这些模块的准备。
 
 注：该特性已并入 linux-next ，很可能出现在 4.9 内核中。第三方模块开发者们，面对疾风吧！
 
@@ -282,6 +287,8 @@ CPU 电源管理策略将是不可能的（CPU 的调速器依然可以修改，
 此这在 2012 年之后已经不成问题，你可能会在 X 中看到 ioperm() 失败的警告，但 X 会正确的
 fallback，不会有任何问题。
 
+TODO: 这个特性在 Tom Li 的机器上是关闭的，但他忘了是因为什么冲突造成的了……VirtualBox？
+
 #### [\*] Harden BPF interpreter
 
 建议选择 Y，这会让 PaX 加固内核的 BPF 解释器。BPF 是内核自身提供的低级网络脚本语言，可以用来
@@ -329,12 +336,16 @@ fork()，以避免某些程序以不断 fork() 的形式利用某个漏洞。这
 的。为了避免一些疏漏，PaX 编译脚本会自动在内核编译时修改 /boot, /lib/modules 和内核源码目录的权限，
 只允许 root 访问。
 
+另外，这个特性和某些第三方模块冲突，是 VirtualBox 还是 ZFS 来着？
+
 #### [\*] Randomize layout of sensitive kernel structures
 
 建议选择 Y，这会让 PaX 以利用编译时生成的随机种子，对内核中重要的数据结构加以随机化。攻击者将
 需要更多信息才能攻击内核数据，加大攻击难度。随机种子将保存在 tools/gcc/randomize\_layout\_seed.h，
 换句话说，如果攻击者获得了你的种子，那么这个特性就没有用了。但这个文件并不会在 make clean 时清空，
 因为后续的模块编译需要知道种子。
+
+另外，这个特性和某些第三方模块冲突，是 VirtualBox 还是 ZFS 来着？
 
 #### [\*] Use cacheline-aware structure randomization
 
@@ -356,11 +367,77 @@ Details are *TODO* now.
 建议选择 Y。Grsecurity 的 RBAC 是一个大型权限控制系统，需要以死亡无数脑细胞为代价学习其使用。在那之前，
 启动它只能为黑客限制你的行为留下一个后门。
 
+#### [\*] Hide kernel process
+
+强烈建议选择 Y，这会让 PaX 隐藏所有的内核进程，让攻击者对内核的进程一无所知，加大攻击难度。
+对调试内核以外的工作都没有影响。
+
+
 ## → Customize Configuration → Filesystem Protections --->
 
 ## → Customize Configuration → Kernel Auditing --->
 
+**除了这些选项，其他的都可以开启**
+
+### [  ] Single group for auditing
+
+由于下文将提到的三个选项将产生海量日志，因此 PaX 可以仅仅对某一个用户组开启下面的三类日志，
+用于监视可疑的用户而内核日志不会发洪水。在桌面系统上，这个选项没有意义。
+
+### [  ] Exec logging
+
+不要开启这个选项，否则 PaX 会将所有 exec\*() 全部都记录在内核日志中。这是程序执行受控的特殊环境中
+用来做安全审计的，不是面向服务器或桌面的。
+
+### [  ] Log execs within chroot
+
+不要开启这个选项，否则 PaX 会将 chroot() 环境中的所有 exec\*() 全部都记录在内核日志中。这个选项本来
+无所谓，因为平时几乎不会使用 chroot，但 Lennartware 都会使用 chroot() 加固自身，于是……
+
+### [  ] Chdir logging
+
+不要开启这个选项，否则 PaX 会将 chdir() 全部记录在内核里。Lennartware 都会使用 chdir() 加固自身，于是……
+
 ## → Customize Configuration → Executable Protections --->
+
+### [\*] Dmesg(8) restriction
+
+强烈开启这个选项，让 PaX 禁止非 root 查看 dmesg 得到有用信息来攻击系统。注意：如果你的 systemd-journal 依然
+允许普通用户查看 dmesg，这个选项你就白开启了！别忘了禁止 systemd-journal 给普通用户提供 dmesg！
+
+### [ ] Deter ptrace-based process snooping
+
+这个选项会让 PaX 允许父进程 ptrace() 自进程，但不允许 ptrace() 随便找的进程。这样一来，gdb 和 strace
+依然可以调试程序，对日常开发影响不大，但将不被允许 attach 到任意一个进程上进行调试。听着好像是挺不错的，
+在服务器上开启可以防住很多攻击。然而，Wine 的工作方式就是 attach 到其他程序上执行 ptrace()，这会影响 Wine。
+
+可以用 sysctl 关闭。
+
+### [\*] Require read access to ptrace sensitive binaries
+
+开启这个选项，让 PaX 禁止用户 ptrace() 自己连读程序本体二进制都没权限的进程，如果有用户这么做多半是要干
+坏事。可以 sysctl 关闭。
+
+### [\*] Enforce consistent multithreaded privileges
+
+开启这个选项，让 PaX 将多进程程序共享 gid 和 capabilities 等权限信息。glibc 会对所有程序都自动做这样的处理，
+但其他 libc 可能没有这个功能，再者 glibc 可能会出问题，因此我们可以让 PaX 帮助我们完成这项任务。可以 sysctl
+关闭。
+
+### [\*] Disallow access to overly-permissive IPC objects
+
+开启这个选项，让 PaX 禁止权限宽松到离谱的 IPC 被访问，以免 buggy 的 IPC 程序被攻击。但同时允许有 `CAP_IPC_OWNER`
+权限的进程这么做。我从没见过这个特性导致问题，推荐开启。可以 sysctl 关闭。
+
+### [\*] Disallow unprivileged use of command injection
+
+开启这个选项，让 PaX 禁止普通用户使用 TIOCSTI 这个 ioctl() 将命令注入到 tty 中。这种行为几乎没有任何合情合理的使用，
+而在历史上则被用来劫持 su 等程序。建议开启。可以 sysctl 关闭。
+
+### [  ] Trusted Path Execution
+
+关闭这个选项，否则 PaX 可以将某个用户组标记为可疑用户组，禁止这些用户执行所有者不是 root 的程序。换句话说就是禁止他们
+执行非系统自带的程序。这在服务器上是有用的，但在桌面上则会禁止用户执行任何自己的程序。
 
 ## → Customize Configuration → Network Protections --->
 
