@@ -1,9 +1,9 @@
 面向桌面的 PaX/Grsecurity 配置详细注释与评论
 ==============================================
 
-** 注意：选什么不选什么暂时不要信！目前不保证正确！ **
+ ** 注意：不要盲目听信“建议”！适合的才是最好的！ **
 
-## → Security options → Grsecurity  --->
+## → Security options → Grsecurity --->
 
 #### [\*] Grsecurity (CONFIG\_GRKERNSEC)
 
@@ -21,6 +21,51 @@ PaX 自带进行「安全」和「性能」两种自带配置集合。但是如�
 还是可以自行从头配置。
 
 作为初学者，可能还是从自动配置的基础上微调比较好。
+
+### 以下标签仅在 Configuration Method 选择 Automatic 的情况下出现。
+
+#### Usage Type --->
+
+- Server (CONFIG\_GRKERNSEC\_CONFIG\_SERVER)
+- Desktop (CONFIG\_GRKERNSEC\_CONFIG\_DESKTOP)
+
+就按照英文的意思选就行啦~
+
+#### Virtualization Type --->
+
+- None (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_NONE)
+- Guest (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_GUEST)
+- Host (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_HOST)
+
+根据虚拟化的场景选择就好啦~
+
+#### Virtualization Hardware --->
+
+- EPT/RVI Processor Support (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_EPT)
+- First-gen/No Hardware Virtualization (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_SOFT)
+
+前一个选项会启用一些对新式虚拟化技术特别的优化，但是后一个选项则是追求稳妥。
+
+如果你的硬件够新（其实好像 Sandy Bridge+ 就够了），选第一个选项。
+
+如果你的硬件太老，你可能需要上 http://www.jd.com 来解决这个问题，或者选择后一个选项。
+
+#### Virtualization Software --->
+
+- Xen (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_XEN)
+- VMware (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_VMWARE)
+- KVM (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_KVM)
+- VirtualBox (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_VIRTUALBOX)
+- Hyper-V (CONFIG\_GRKERNSEC\_CONFIG\_VIRT\_HYPERV)
+
+根据你要用到的虚拟化软件选择。
+
+#### Required Priorities --->
+
+- Performance (CONFIG_GRKERNSEC_CONFIG_PRIORITY_PERF)
+- Security (CONFIG_GRKERNSEC_CONFIG_PRIORITY_SECURITY)
+
+鱼与熊掌不可兼得，这里就需要在 Performance 和 Security 之间做个取舍啦~
 
 ## → Security options → Grsecurity → Customize Configuration → PaX
 
