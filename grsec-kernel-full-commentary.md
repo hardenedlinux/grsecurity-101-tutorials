@@ -155,6 +155,36 @@ XATTR\_PAX 现在被广泛使用。
 
 如果出了问题，试试关掉它吧。
 
+#### Code Pointer Instrumentation Method --->
+
+- none
+- bts
+- or
+
+“none”的话，就是“无为而治”，把保护不被执行的问题甩给 CPU 。性能和模块兼容性都最好，但是需要 Sandy Bridge 或更新的处理器。
+
+“bts“ 和 ”or“ 都是用 GCC Plugin 的做法。前者性能影响较大，但是与 Binary Modules 兼容；后者性能影响较小，但是与第三方模块兼容性比较差。
+
+### Address Space Layout Randomization --->
+
+#### [\*] Address Space Layout Randomization
+
+强烈建议选择 Y！这个特性能够以较小 Performance Overhead 换来对很多攻击的直接防范，物超所值。
+
+而且下面两个特性也依赖于这个特性。
+
+#### [?] Randomize kernel stack base
+
+比较建议选择 Y，但使用 VirtualBox 或者其他写的不太好的第三方模块的话，需要关掉这个特性。
+
+这个特性可以抵御一些 Ring0 的提权攻击。
+
+#### [\*] Randomize user stack and mmap() bases
+
+建议选择 Y。这个特性可以在一定程度上避免用户空间的攻击。（如对 mmap 地址的探测）
+
+（反正这个特性可以通过 PaX Flags 开关）（逃）
+
 ### → Miscellaneous hardening features --->
 
 #### [\*] Sanitize all freed memory
@@ -179,19 +209,30 @@ XATTR\_PAX 现在被广泛使用。
 导致可见的性能损失，特别是在 x86 和不支持虚拟化指令集的 CPU 上。如果这是一台虚拟
 机容器母机你可能需要在启用前考虑考虑。
 
+对于 Broadwell 以上的处理器，可以使用处理器的 SMAP 特性代替本软件特性，能够避免许多坑。
+
+（注： SMAP 当被单独依赖的情况下有一定可能性被 Bypass ，UDEREF 并没有）
+
 #### [\*] Prevent various kernel object reference counter overflows
 
 建议选择 Y，PaX 会避免许多内核引用计数器溢出，杜绝多数对内核的此类攻击。为避免后续的内
 存破坏，当 PaX 发现引用计数器出现泄漏时，对应的内存将永远不会被释放，但这对于
 数字节的内核数据结构很少成为问题，而且这项保护措施几乎不会导致任何性能影响。
 
+#### [ ] Automatically constify eligible structures
+
+建议选择 N。这个选项会常量化很多内核里的函数指针数组，从而避免函数被“重载”。
+
+同样，这可能对第三方模块造成伤害。
+
 #### [\*] Harden heap object copies between kernel and userland
 
 建议选择 Y，PaX 会在数据在用户空间与内核空间互相传递时，进行一系列的双向保护和检查措施，
-严防途中出现疏漏。这些保护措施几乎不会导致任何性能损失。然而，这会导致第三方内核不能
-通过检查，需要修改。明显了两个例子是 ZFS 与 nvidia-drivers，前者得到了官方上游支持，后者
-得到了 PaX Team 的支持。但对于其他补丁和模块就没有办法了。然而使用 PaX 内核本身，你显然已经
-做好了不使用这些模块的准备。
+严防途中出现疏漏。这些保护措施几乎不会导致任何性能损失。
+
+然而，这会导致第三方内核不能通过检查，需要修改。明显了两个例子是 ZFS 与 nvidia-drivers，前者
+得到了官方上游支持，后者得到了 PaX Team 的支持。但对于其他补丁和模块就没有办法了。然而使用
+PaX 内核本身，你显然已经做好了不使用这些模块的准备。
 
 注：该特性已并入 linux-next ，很可能出现在 4.9 内核中。第三方模块开发者们，面对疾风吧！
 
@@ -213,10 +254,12 @@ XATTR\_PAX 现在被广泛使用。
 
 #### [ ] Prevent code reuse attacks
 
-建议选择 N，否则 PaX 会避免代码重用攻击。代码重用攻击是一类相当危险的攻击，在各种代码执行漏洞
+建议选择 N。这个选项能避免代码重用攻击。代码重用攻击是一类相当危险的攻击，在各种代码执行漏洞
 都被安全措施规避后，攻击者开始利用程序自身的代码来发动攻击，而不是跳转执行攻击者的代码来发动攻击。
-这相当成功，绝大多数时候一个图灵完全的运行环境都是可行的。在不需要二进制驱动和模块的服务器
-以及（使用 Intel 的）桌面机器上，这是一项相当不错的特性。但这会导致 Nvidia 等私有驱动无法运行。
+这相当成功，绝大多数时候一个图灵完全的运行环境都是可行的。
+
+在不需要二进制驱动和模块的服务器以及（使用 Intel 的）桌面机器上，这是一项相当不错的特性。但这会导
+致 Nvidia 等私有驱动无法运行。
 
 ## → Customize Configuration → Memory Protections --->
 
