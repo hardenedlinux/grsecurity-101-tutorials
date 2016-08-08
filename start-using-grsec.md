@@ -6,7 +6,7 @@
 
 - Alpine
 
-以下常见发行版可以从包管理安装带 Grsecurity 的 Linux 内核。（注意：预编译的 Linux w/ Grsecurity 不一定符合你的需求，可能你最终也要自行编译内核）
+以下常见发行版可以从包管理安装带 Grsecurity 的 Linux 内核。（注意：预编译的 Linux w/ Grsecurity 不一定符合你的需求，强烈建议自行编译内核）
 
 - Arch: ```linux-grsec```
 - Debian: ```linux-image-grsec-amd64``` 或者 ```linux-image-grsec-i386``` （根据系统架构确定）
@@ -15,6 +15,8 @@
 如果你不是使用上述发行版，你可能需要自行下载补丁并编译内核。
 
 ## 自行编译 Linux Kernel w/ PaX/Grsecurity
+
+发行版提供的 PaX/Grsecurity 内核很可能不能符合具体的要求。所以，*强烈建议*自行编译内核。
 
 Grsecurity 的补丁集最新版下载地址为： https://grsecurity.net/download.php
 
