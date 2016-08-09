@@ -313,7 +313,9 @@ TODO: 这个特性在 Tom Li 的机器上是关闭的，但他忘了是因为什
 #### [\*] Harden BPF interpreter
 
 建议选择 Y，这会让 PaX 加固内核的 BPF 解释器。BPF 是内核自身提供的低级网络脚本语言，可以用来
-编写网络脚本从而实现内核态高效的网络包处理。在 BPF 几乎没有什么用途的绝大多数机器，建议
+编写网络脚本从而实现内核态高效的网络包处理。PaX/Grsecurity在[2012年在这
+个feature](https://forums.grsecurity.net/viewtopic.php?f=7&t=4463)里实现了Constant blindings以对抗在变长指令集架构下的JIT污染的
+问题，[Linux内核在4.7中实现](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=4f3446bb809f20ad56cadf712e6006815ae7a8f9)了类似的实现。在 BPF 几乎没有什么用途的绝大多数机器，建议
 直接在 → Networking support → Networking options 的 [  ] enable BPF Just In Time compiler
 中选择 N，完全禁用 BPF 解释器。
 
