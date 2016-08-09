@@ -173,7 +173,6 @@ XATTR\_PAX 现在被广泛使用。
 注意，如果你使用 Nvidia 私有驱动，那么如果不选择此选项，可能需要将**每一个**用到
 OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否选择前应该进行测试。
 
-
 #### [?] Enforce non-executable kernel pages
 
 相当于内核里的 MPROTECT 和 PAGEEXEC，在绝大多数服务器和桌面上可以安全开启此特性，
@@ -429,7 +428,7 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 
 ## → Customize Configuration → Kernel Auditing --->
 
-**除了这些选项，其他的都可以开启**
+### **以下选项强烈建议关闭**
 
 #### [  ] Single group for auditing
 
@@ -450,18 +449,35 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 
 不要开启这个选项，否则 PaX 会将 chdir() 全部记录在内核里。Lennartware 都会使用 chdir() 加固自身，于是……
 
+### **以下选项强烈建议开启**
+
+#### [\*] Resource logging
+
+启用这个选项，可以记录超出资源限制的情况。
+
+超出资源限制的情况有两种：一是限制太小，二是有程序试图破坏秩序。无论如何，这都是需要注意的情况。
+
+### [\*] Denied RWX mmap/mprotect logging
+
+这个选项一定要启用，不然调试 MPROTECT 豁免会成为一个灾难。（基本靠猜）
+
 ## → Customize Configuration → Executable Protections --->
 
-#### [\*] Dmesg(8) restriction
+#### [?] Dmesg(8) restriction
 
-强烈开启这个选项，让 PaX 禁止非 root 查看 dmesg 得到有用信息来攻击系统。注意：如果你的 systemd-journal 依然
+如果开启这个选项，PaX 就能禁止非 root 查看 dmesg 得到有用信息来攻击系统。注意：如果你的 systemd-journal 依然
 允许普通用户查看 dmesg，这个选项你就白开启了！别忘了禁止 systemd-journal 给普通用户提供 dmesg！
+
+当然对于用户较少的桌面系统，这个选项的意义并不是很大，可以关闭。
 
 ### [ ] Deter ptrace-based process snooping
 
 这个选项会让 PaX 允许父进程 ptrace() 自进程，但不允许 ptrace() 随便找的进程。这样一来，gdb 和 strace
 依然可以调试程序，对日常开发影响不大，但将不被允许 attach 到任意一个进程上进行调试。听着好像是挺不错的，
 在服务器上开启可以防住很多攻击。然而，Wine 的工作方式就是 attach 到其他程序上执行 ptrace()，这会影响 Wine。
+
+TODO：在 Icenowy 的机器上这个特性被开启着，然而 Wine 还能工作。甚至在 QEMU i386 emulation 环境里（未实现
+ptrace() 系统调用） Wine 也能工作。
 
 可以用 sysctl 关闭。
 
