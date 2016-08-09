@@ -173,7 +173,7 @@ XATTR\_PAX 现在被广泛使用。
 注意，如果你使用 Nvidia 私有驱动，那么如果不选择此选项，可能需要将**每一个**用到
 OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否选择前应该进行测试。
 
-#### [?] Enforce non-executable kernel pages
+#### [?] Enforce non-executable kernel pages( KERNEXEC)
 
 相当于内核里的 MPROTECT 和 PAGEEXEC，在绝大多数服务器和桌面上可以安全开启此特性，
 但有些内核代码，特别是第三方内核模块需要这种机制，尤其是 VirtualBox。
@@ -190,6 +190,10 @@ OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否�
 “none”的话，就是“无为而治”，把保护不被执行的问题甩给 CPU 。性能和模块兼容性都最好，但是需要 Sandy Bridge 或更新的处理器。
 
 “bts“ 和 ”or“ 都是用 GCC Plugin 的做法。前者性能影响较大，但是与 Binary Modules 兼容；后者性能影响较小，但是与第三方模块兼容性比较差。
+
+KERNEXEC对于x64的版本无法提供等同于SMEP的功能，对函数指针的检查也会降低性能，x64
+的场景下建议关掉，前提是SandyBridge+的处理器。KERNEXEC对于x86和ARMv7的
+安全防护还是很强悍。
 
 ### Address Space Layout Randomization --->
 
@@ -228,7 +232,7 @@ OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否�
 建议选择 Y，PaX 会在将一些内核局部变量在拷贝到用户空间之前，以 0 初始化这些
 变量。这在单核系统上的开销小于 1%。
 
-#### [ ] Prevent invalid userland pointer dereference
+#### [ ] Prevent invalid userland pointer dereference( UDEREF)
 
 建议关闭，坑太多。PaX 会在内核内部代码中阻止用户空间指针的解引用，因为这些指针在本不
 该出现内核。这可以避免相当一大类针对内核漏洞的攻击。但这在某些虚拟化环境下可能会
@@ -238,6 +242,19 @@ OpenGL 的程序都进行标记，因此你可能希望选择，但具体是否�
 对于 Broadwell 以上的处理器，可以使用处理器的 SMAP 特性代替本软件特性，能够避免许多坑。
 
 （注： SMAP 当被单独依赖的情况下有一定可能性被 Bypass ，UDEREF 并没有）
+
+UDEREF的x64至少有2种不同的实现类型：
+
+* 2010年x64的版本很弱，而且无法防御内核直接指向userspace pointer而这个
+pointer又指向kernel space的情况，但这个实现对于那个年代还是很超前
+
+* 2013年的x64版本利用了sandy bridge+的处理器中的PCID用于给TLB打tags，
+这个版本安全性和性能得到了比较好的trade-off，[pi3认为这个版本比2014年的
+Intel SMAP提供了更高的安全性](http://hardenedlinux.github.io/system-security/2015/07/05/badiret-exp.html)。
+
+UDEREF的最强实现是针对x86和ARMv7，x86使用了分段机制，而[ARMv7使用了
+memory domain](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67decb18f1c9751e8b3c3de3d551075)。
+
 
 #### [\*] Prevent various kernel object reference counter overflows
 
@@ -323,7 +340,7 @@ TODO: 这个特性在 Tom Li 的机器上是关闭的，但他忘了是因为什
 
 建议选择 Y，这会让 PaX 禁止普通用户使用 PERF\_EVENTS 性能计数器。PERF\_EVENTS 计数器对于程序的
 性能调试很有帮助，但常规用户则不会用到它，而且 PERF\_EVENTS 在过去几年已经发现了多个漏洞，
-禁止普通用户使用 PERF\_EVENTS 有助于杜绝攻击。当此选项启用时，`/proc/sys/kernel/perf\_event\_paranoid`
+禁止普通用户使用 PERF\_EVENTS 有助于杜绝攻击。当此选项启用时，`/proc/sys/kernel/perf_event_paranoid`
 将会新增一个新的选项 `3`，并且设定为默认值，以禁用非 root 用户使用 PERF\_EVENTS。在需要进行
 性能调试开发时，root 可以轻易把它修改回更低的值（在原始内核中规定的），来允许 PERF\_EVENTS。
 
