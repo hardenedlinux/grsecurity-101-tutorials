@@ -14,7 +14,7 @@
 注意：打开这里意味着你需要安装 GCC 插件头文件。很多发行版将这些头文件拆成了一个单独
 的软件包。
 
-\ 另外该框架已被并入 Linux 4.8 中！感谢 KSPP！ /
+\ 另外该框架已被[并入 Linux 4.8 中](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f716a85cd6045c994011268223706642cff7e485)！感谢 KSPP！ /
 
 ## → Security options → Grsecurity --->
 
