@@ -268,7 +268,7 @@ memory domain](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67dec
 
 同样，这可能对第三方模块造成伤害。
 
-#### [\*] Harden heap object copies between kernel and userland
+#### [\*] Harden heap object copies between kernel and userland( PAX_USERCOPY)
 
 建议选择 Y，PaX 会在数据在用户空间与内核空间互相传递时，进行一系列的双向保护和检查措施，
 严防途中出现疏漏。这些保护措施几乎不会导致任何性能损失。
@@ -277,7 +277,7 @@ memory domain](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67dec
 得到了官方上游支持，后者得到了 PaX Team 的支持，另外 VirtualBox 模块也得到了 PaX Team 的补丁
 支持。但对于其他补丁和模块就没有办法了。然而使用PaX 内核本身，你显然已经做好了不使用这些模块的准备。
 
-注：该特性已并入 linux-next ，很可能出现在 4.9 内核中。第三方模块开发者们，面对疾风吧！
+注：该特性已[并入Linux 4.8](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e) 。第三方模块开发者们，面对疾风吧！
 
 #### [ ] Prevent various integer overflows in function size parameters
 
