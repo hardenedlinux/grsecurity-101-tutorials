@@ -494,9 +494,8 @@ Lannertware 正常运行了。不过这些子选项都是可以开启的，毕�
 这个选项会让 PaX 允许父进程 ptrace() 自进程，但不允许 ptrace() 随便找的进程。这样一来，gdb 和 strace
 依然可以调试程序，对日常开发影响不大，但将不被允许 attach 到任意一个进程上进行调试。听着好像是挺不错的，
 在服务器上开启可以防住很多攻击。然而，Wine 的工作方式就是 attach 到其他程序上执行 ptrace()，这会影响 Wine。
-
-TODO：在 Icenowy 的机器上这个特性被开启着，然而 Wine 还能工作。甚至在 QEMU i386 emulation 环境里（未实现
-ptrace() 系统调用） Wine 也能工作。
+因为 Wine 在模拟一些权限较高的 Windows API 的时候会调用 ptrace 。（比如 Wine 在运行臭名昭著的 QQProtect.exe
+的时候就会用到 ptrace）这些 API 本身功能就比较危险，属于 Windows 的黑暗面，所以要不要为它们放行请自行抉择。
 
 可以用 sysctl 关闭。
 
