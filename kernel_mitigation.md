@@ -1,0 +1,52 @@
+# PaX/Grsecurity --> KSPP --> AOSP kernel, Linux kernel mitigation checklist
+
+We should treat security as a whole, just like the combination of PaX/Grsecurity features/code hardening build up a defense-in-depth solution for Linux kernel, which is a core infrastructre we are highly rely on. [PaX/Grsecurity](http://grsecurity.net/) is a set of security hardening specific patch that brings the linux kernel security into another level. It's a great value to make all FLOSS community getting benefit from it. [KSPP( Kernel self protection project)](http://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project) was started in Nov 2015 after [a disclosure](http://www.washingtonpost.com/sf/business/2015/11/05/net-of-insecurity-the-kernel-of-the-argument/) about linux kernel security. This is the 1st time the public had chance to know that linux kernel security might endanger the mobile platform( Android) and IoT devices. KSSP has been trying to port features/code hardening from PaX/Grsecurity to Linux upstream. Bad guys wouldn't like to see it happen, but it will, a part of it at least;-) KSPP is quite important to Android dev/user community,  because AOSP kernel security is highly rely on how KSPP goes. I'd like to see more features of PaX/Grsecurity lands in vanilla linux and AOSP kernel and more importantly, give PaX/Grsecurity the credits they deserved.
+
+Thanks to PaX team/Spender, they guys initiated the ALPHA philosophical ideas and implementations of defensive mitigation of system security. PaX/Grsecurity may not be the OMEGA in this field, but I'm damn sure they are the fuc* ALPHA.  Also thanks to Kees Cook( not like rockstars from PROJECTZERO, he's a hidden hero), Daniel Micay( awesome contributor of AOSP kernel and interesting work of libc hardening; And, [CopperheadOS may be the only ROM](https://gist.github.com/thestinger/8b3c3467a3e88bc26fa7848a2064fa47)[**DO NOT INCLUDE PRIVATE CONSULTING SOLUTION**] trying that hard to protect individual's privacy and digital asset.) and other contributors for FLOSS security.
+
+Before you dive into the devils, plz go get a cup of cofee or green tea and think what the hell is/isn't security..........
+------------------------------------------------------------------
+## Security is NOT:
+
+* Security is NOT installing a firewall ..
+* Security is NOT a Product or Service .. ( by Schneier, Bruce )
+* Security is Not a Product; It's a Process .. ( by Schneier, Bruce )
+* A Security Audit is NOT "running a port scan and turning things off" ..
+
+
+## Security is:
+
+* Security is "Can you still continue to work productively/safely, without compounding the security breach"
+* Security is only as good as your "weakest link"
+* Security is "risk management" of your corporate resources(computers/people), required expertise, time management, implementation costs, data backup/recovery proceedures ...
+* Security is a Process, Methodology, Costs, Policies and People
+* Security is "Can somebody physically walk out with your computers, disks, tapes, .. "
+* Security is 24x7x365 ... constantly ongoing .. never ending
+* Security is "learn all you can as fast as you can, without negatively affecting the network, productivity and budget"
+------------------------------------------------------------------
+
+
+## [GCC plugins](https://lwn.net/Articles/691102/)
+
+* [GCC plugins infrastructure, CYC_COMPLEXITY, SANCOV](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f716a85cd6045c994011268223706642cff7e485), merged in v4.8
+* [HARDENED_USERCOPY](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e), it was originally based on PAX_USERCOPY, merged in v4.8
+
+## [Post-init read-only memory](https://lwn.net/Articles/666550/), merged in v4.6
+
+* [arm64 vdso Mark vDSO code as read-only](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=88d8a7994e564d209d4b2583496631c2357d386b)
+* [arm/x86: vdso: Mark vDSO code as read-only, Enable CONFIG_DEBUG_RODATA by default](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d09e356ad06a8b6f5cceabf7c6cf05fdb62b46e5)
+
+## ret2usr protection
+I'm not sure how many incidents were getting involved with easy-to-write null-deref exploit. The truth is there were a lot. It ended by restrict minimal address of memory mapping, which is a trivial mitigation after Spender's Enlightment framework showed up in those endless crazy party;-) It was a crazy era fulfilled with ignorance and a shame to the defensive side, even not to mention the *backdoor* fix( "thanks" to the greatest GNU/Linux vendor..well, they wouldn't call themselves "GNU and slash and Linux" vendor, I suppose;-)) for the mitigation which supposed to protect your digital asset. KERNEXEC/UDEREF are the only options back in those 0ld horrible "one null-deref bug can root them all" days and remeber this: It's not very long ago. 
+
+* [KERNEXEC](https://lwn.net/Articles/461811/), Set [syscall table, IDT, GDT, some page tables] to RO & set [data pages] to NX( Note: some tricks prevent new attacks like ret2dir, ask PaX team/Spender) in x86, which is the strongest implementation of KERNEXEC. Recommended priority selection for different architectures: x86 -> armv7 -> x86_64.
+* [UDEREF](https://forums.grsecurity.net/viewtopic.php?f=7&t=3046), x86 is the strongest one, as Grsecurity's blog described. [ARMv7](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67decb18f1c9751e8b3c3de3d551075) is also a strong implementation. [The story of x64/UDEREF](http://blog.pi3.com.pl/?p=509) is complicated a bit and it has 3 different implementations. The strong one was introduce in Aug 2013. It's Aug 2016 now...you know what you can do if you're going to deploy a new production server/desktop.
+* [SMEP( Supervisor Mode Execution Protection)](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=de5397ad5b9ad22e2401c4dacdf1bb3b19c05679), it's provided by Intel x86( Sandybridge or newer) to achieve a subset functions of KERNEXEC. SMEP will prevent( mmap & exec [SHELLCODE of prepare_kernel_cred/commit_creds] shit, ring the bell?) if kernel attemp to code execution in a page not owned by kernel itself. Unlike KERNEXEC, it's not able to prevent exploitation of RWX or important data structure.
+* [SMAP( Supervisor mode access prevention)](https://lwn.net/Articles/517475/), merged in v3.7. It's provided by Intel x86( Broadwell or newer) to achieve the same goal of UDEREF. But it's weaker than the current implementation of UDEREF.
+* PXN( Privileged execute-never), PXN is provided by ARM hardware and it's a similar feature like SMEP. Weaker than KERNEXEC( Did someone still ask?), that's for sure. arm64's PXN implementaion is [merged in v3.7](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=8e620b0476696e9428442d3551f3dad47df0e28f), and armv7's PXN implementation is [merged in v3.19](http://git.kernel.org/cgit/linux/kernel/git/davem/net.git/commit/?id=1d4d37159d013a4c54d785407dd8902f901d7bc5). According to [Grsecurity's blog](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=113b18536ba6764d3fd7a1a61c5b281a), the 1st PXN implementation of armv7 was from PaX/Grsecurity back in early 2013.
+* [PAN( Privileged Access Never)](https://community.arm.com/groups/processors/blog/2014/12/02/the-armv8-a-architecture-and-its-ongoing-development), PAN is a new feature of ARMv8.1 to achieve the same goal like SMAP and it's [merged in v4.3](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=338d4f49d6f7114a017d294ccf7374df4f998edc). The shitty thing is that we don't have ARMv8.1 yet, while ARMv8( arm64) is shipping hundred thousands chips for GNU/Linux and Android every day. Customers might not notice their device doesn't have supposed-to-be-off-the-shell mitigation;-) Fortunately, there's [software-based PAN implementation for armv7](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=a5e090acbf545c0a3b04080f8a488b17ec41fe02) and it's merged in v4.3. Speaking of arm64's implementation, there's a [patch](http://www.spinics.net/lists/arm-kernel/msg523579.html) not merged yet. Ironically, Linux kernel upstream may be willing to merge software-based PAN implementations for both armv7 and arm64 but PaX's UDEREF( armv7-only). If we are talking about software-based implementation without taking performance issue into account, we should've put security into the 1st priority...You know what I'm talking about, aren't u;-)
+
+## [BPF JIT](https://lwn.net/Articles/437981/) hardening
+This [type of attack](https://lwn.net/Articles/525609/) is aginst variable-length instruction architecture specifically. This problem is almost a disaster in some *important* application( e.g: Adobe FLash) on Desktop/Mobile. Cu'z it's more likely a RCE to be appeared. For GNU/Linux server, it's still an attack vector that we should taking very serious.
+
+* [Constant blinding](https://forums.grsecurity.net/viewtopic.php?f=7&t=4463), the 1st implementation of this hardening feature by Grsecurity back in 2012 and it's called GRKERNSEC_BPF_HARDEN. Upstream merged a [similar feature in v4.7](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=4f3446bb809f20ad56cadf712e6006815ae7a8f9). 
