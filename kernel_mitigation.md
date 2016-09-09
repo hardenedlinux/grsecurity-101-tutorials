@@ -36,6 +36,13 @@ Before you dive into the devils, plz go get a cup of cofee or green tea and thin
 * [arm64 vdso Mark vDSO code as read-only](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=88d8a7994e564d209d4b2583496631c2357d386b)
 * [arm/x86: vdso: Mark vDSO code as read-only, Enable CONFIG_DEBUG_RODATA by default](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d09e356ad06a8b6f5cceabf7c6cf05fdb62b46e5)
 
+## use-after-free reduction/mitigation
+use-after-free is a very popular bug class in kernel and it can be exploited by the adversary to gain information or priviledges.
+
+* PAX_MEMORY_SANITIZE does poisoning/sanitization the memory on free to reduces the attack surface. Laura Abbott submitted a [similar implementation](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=8823b1dbc05fab1a8bec275eeae4709257c2661d)( as [debug options](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1414c7f4f7d72d138fff35f00151d15749b5beda)) inspired( which isn't?;-)) by PAX_MEMORY_SANITIZE and merged in v4.6.
+
+* SL*B freelist randomization was submitted by Thomas Garnier. For more detail, plz read his [write-up](https://medium.com/@mxatone/randomizing-the-linux-kernel-heap-freelists-b899bb99c767#.oxwte8xb5). [SLAB freelist randomization](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c7ce4f60ac199fb3521c5fcd64da21cee801ec2b) merged in v4.7 and [SLUB freelist randomization](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=210e7a43fa905bccafa9bb5966fba1d71f33eb8b) merged in v4.8.
+
 ## ret2usr protection
 I'm not sure how many incidents were getting involved with easy-to-write null-deref exploit. The truth is there were a lot. It ended by restrict minimal address of memory mapping, which is a trivial mitigation after Spender's Enlightment framework showed up in those endless crazy party;-) It was a crazy era fulfilled with ignorance and a shame to the defensive side, even not to mention the *backdoor* fix( "thanks" to the greatest GNU/Linux vendor..well, they wouldn't call themselves "GNU and slash and Linux" vendor, I suppose;-)) for the mitigation which supposed to protect your digital asset. KERNEXEC/UDEREF are the only options back in those 0ld horrible "one null-deref bug can root them all" days and remeber this: It's not very long ago. 
 
