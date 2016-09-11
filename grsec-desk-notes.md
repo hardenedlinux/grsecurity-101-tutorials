@@ -24,3 +24,9 @@ x86\_32 版本 Mesa 的 libGL 使用了一个自修改代码的优化，会与 M
 编译 Mesa 的时候加 --enable-glx-read-only-text 参数可以避免。
 
 此外 Mesa 的 LLVMPipe 软件渲染器也是一个神奇的 JIT （Shader -> 机器码），所以要使用 LLVMPipe 的话，需要给所有用 OpenGL 的程序都关掉 MPROTECT。
+
+## nvidia-drivers / Wine
+
+如果你在 grsec + 加固 userspace 上使用 nvidia-driver 私有显卡驱动，你可能会发现 Wine 运行应用程序时会发生 Wine32 错误进而崩溃，这和 `-Wl,-z,now` 有关，使用 `-Wl,-z,lazy` 关闭立即绑定，恢复到 lazy 绑定即可恢复正常。
+
+TODO: 这仅仅是 Hardened Userpace 导致的，还是和 grsec 内核有关？
