@@ -20,7 +20,7 @@
 
 Grsecurity 的补丁集最新版下载地址为： https://grsecurity.net/download.php
 
-Grsecurity 的主页不会保管其历史版本，所以，如果你需要历史版本的 Grsecurity 补丁集，你需要去另一个网站下载：http://deb.digdeo.fr/grsecurity-archives/
+Grsecurity 的主页不会保管其历史版本，所以，如果你需要历史版本的 Grsecurity 补丁集，你需要去另一个网站下载：http://deb.digdeo.fr/grsecurity-archives/ 或者 http://mirrors.muarf.org/grsecurity/
 
 同时，Grsecurity 需要版本匹配的 Linux 内核源码，Linux 内核源码可以从 https://www.kernel.org 下载。
 
