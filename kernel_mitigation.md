@@ -68,3 +68,8 @@ Jon Oberheide shared about [kernel stack attack surfaces](https://jon.oberheide.
 
 ## [GRKERNSEC_PERF_HARDEN](https://lwn.net/Articles/695978/)
 PERF is a fuc*ing serious attack surface. We can't bear it running by default in production system. Ben Hutchings [proposed a patch](https://lkml.org/lkml/2016/1/11/587) from PaX/Grsecurity to linux kernel but it rejected by kernel maintainer. Fortunately, Jeff Vander Stoep [merged it into AOSP kernel](https://android-review.googlesource.com/#/c/234573/).
+
+
+Write-up about KSPP:
+* [security things in Linux v4.3](https://outflux.net/blog/archives/2016/09/26/security-things-in-linux-v4-3/)
+* [security things in Linux v4.4](https://outflux.net/blog/archives/2016/09/27/security-things-in-linux-v4-4/)
