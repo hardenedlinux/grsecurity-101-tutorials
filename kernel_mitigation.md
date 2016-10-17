@@ -29,7 +29,8 @@ Before you dive into the devils, plz go get a cup of cofee or green tea and thin
 ## [GCC plugins](https://lwn.net/Articles/691102/)
 
 * [GCC plugins infrastructure, CYC_COMPLEXITY, SANCOV](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f716a85cd6045c994011268223706642cff7e485), merged in v4.8
-* [HARDENED_USERCOPY](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e), it was originally based on PAX_USERCOPY, merged in v4.8
+* [HARDENED_USERCOPY](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e) is trying to mitigate heap overflow, which is very popular class of bugs in kernel. It was originally based on PAX_USERCOPY, merged in v4.8
+* PAX_LATENT_ENTROPY is trying extract more entropy on [those functions](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=0766f788eb727e2e330d55d30545db65bcf2623f) marked by __latent_entropy gcc attribute at boot time, which is very helpful to embedded system. Now it's called ["latent_entropy" plugin](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=38addce8b600ca335dc86fa3d48c890f1c6fa1f4) merged in v4.9.
 
 ## [Post-init read-only memory](https://lwn.net/Articles/666550/), merged in v4.6
 
