@@ -64,6 +64,8 @@ This [type of attack](https://lwn.net/Articles/525609/) is aginst variable-lengt
 
 * [Constant blinding](https://forums.grsecurity.net/viewtopic.php?f=7&t=4463), the 1st implementation of this hardening feature by Grsecurity back in 2012 and it's called GRKERNSEC_BPF_HARDEN. Upstream merged a [similar feature in v4.7](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=4f3446bb809f20ad56cadf712e6006815ae7a8f9). 
 
+* [Set register type according to is_valid_access()](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1955351da41caa1dbf4139191358fed84909d64b) is trying to prevent infoleak from an unprivileged eBPF program read a pointer value from its context, merged in v4.9.
+
 ## [vmalloc kernel stack](https://lwn.net/Articles/692208/)
 Jon Oberheide shared about [kernel stack attack surfaces](https://jon.oberheide.org/blog/2010/11/29/exploiting-stack-overflows-in-the-linux-kernel/) and [kernel stack hijacking](https://jon.oberheide.org/files/infiltrate12-thestackisback.pdf) is still useful to exploit Linux and Android kernel. PaX/Grsecurity moved thread_info off the kernel stack for x86 back in 2011. The GRKERNSEC_KSTACKOVERFLOW( there are some other features including moved thread_info off the stack) was forged in 2014 and the 1st support kernel version is v3.14. Andy Lutomirski( other contributors?) is [trying to implement](http://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1168875.html) the exact what GRKERNSEC_KSTACKOVERFLOW does and this feature merged in v4.9(x64-only) via:
 * [fork: Add generic vmalloced stack support](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ba14a194a434ccc8f733e263ad2ce941e35e5787)
