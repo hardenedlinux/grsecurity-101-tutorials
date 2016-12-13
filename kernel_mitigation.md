@@ -36,8 +36,9 @@ Before you dive into the devils, plz go get a cup of cofee or green tea and thin
 
 ## [Post-init read-only memory](https://lwn.net/Articles/666550/), merged in v4.6
 
-* [arm64 vdso Mark vDSO code as read-only](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=88d8a7994e564d209d4b2583496631c2357d386b)
+* [arm64 vdso Mark vDSO code as read-only](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=88d8a7994e564d209d4b2583496631c2357d386b), it's also merged in AOSP kernel for 3.10/3.18/4.1/4.4.
 * [arm/x86: vdso: Mark vDSO code as read-only, Enable CONFIG_DEBUG_RODATA by default](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d09e356ad06a8b6f5cceabf7c6cf05fdb62b46e5)
+* [arm64: always enable DEBUG_RODATA](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=40982fd6b975de4a51ce5147bc1d698c3b075634) merged in v4.9
 
 ## use-after-free reduction/mitigation
 use-after-free is a very popular bug class in kernel and it can be exploited by the adversary to gain information or priviledges.
@@ -99,3 +100,4 @@ Write-up about KSPP:
 * [security things in Linux v4.6](https://outflux.net/blog/archives/2016/09/30/security-things-in-linux-v4-6/)
 * [security things in Linux v4.7](https://outflux.net/blog/archives/2016/10/03/security-things-in-linux-v4-7/)
 * [security things in Linux v4.8](https://outflux.net/blog/archives/2016/10/04/security-things-in-linux-v4-8/)
+* [security things in Linux v4.9](https://outflux.net/blog/archives/2016/12/12/security-things-in-linux-v4-9/)
