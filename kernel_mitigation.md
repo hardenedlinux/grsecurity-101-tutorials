@@ -29,10 +29,13 @@ Before you dive into the devils, plz go get a cup of cofee or green tea and thin
 ## [GCC plugins](https://lwn.net/Articles/691102/)
 
 * [GCC plugins infrastructure, CYC_COMPLEXITY, SANCOV](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=f716a85cd6045c994011268223706642cff7e485), merged in v4.8
-* [HARDENED_USERCOPY](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e) is trying to mitigate heap overflow, which is very popular class of bugs in kernel. It was originally based on PAX_USERCOPY, merged in v4.8
 * PAX_LATENT_ENTROPY is trying extract more entropy on [those functions](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=0766f788eb727e2e330d55d30545db65bcf2623f) marked by __latent_entropy gcc attribute at boot time, which is very helpful to embedded system. Now it's called ["latent_entropy" plugin](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=38addce8b600ca335dc86fa3d48c890f1c6fa1f4) merged in v4.9.
 * [PAX_REFCOUNT](https://forums.grsecurity.net/viewtopic.php?f=7&t=4173), those reference counter overflow bug can be exploited in scenario where UAF( Use-After-Free) comes into game. PAX_REFCOUNT killed this kind of bug class. Elena Reshetova is trying to port PAX_REFCOUNT to vanilla kernel, which is called HARDENED_ATOMIC.
 * [PAX_RAP](https://grsecurity.net/rap_faq.php), the strongest CFI implementation so far. The 1st public RAP version was merged in PaX/Grsecurity 4.5.x's test patch. It's x86_64 only for now. But it can be ported to other architectures. [RAP might utilize the advantage of hardware based implementation](https://forums.grsecurity.net/viewtopic.php?f=7&t=4490&sid=160fe4e25b39c590fbc2aeae4c37415c), such as Intel's CET, ARMv8.3's [pointer authentication](https://community.arm.com/groups/processors/blog/2016/10/27/armv8-a-architecture-2016-additions), etc.
+
+## [PAX_USERCOPY](https://grsecurity.net/news.php)
+
+PAX_USERCOPY kills heap overflow bug when the memory copy occurs between userspace and kernel space in either direction. The 1st version developed by Spender in 2009 and added into PaX later. [HARDENED_USERCOPY](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1eccfa090eaea22558570054bbdc147817e1df5e) is part of PAX_USERCOPY being ported to linux kernel in v4.8.
 
 ## [Post-init read-only memory](https://lwn.net/Articles/666550/), merged in v4.6
 
