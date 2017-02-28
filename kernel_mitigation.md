@@ -47,6 +47,16 @@ PAX_USERCOPY kills heap overflow bug when the memory copy occurs between userspa
 * [arm/x86: vdso: Mark vDSO code as read-only, Enable CONFIG_DEBUG_RODATA by default](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=d09e356ad06a8b6f5cceabf7c6cf05fdb62b46e5)
 * [arm64: always enable DEBUG_RODATA](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=40982fd6b975de4a51ce5147bc1d698c3b075634) merged in v4.9
 
+## W^X detection
+
+* [W^X for x86](https://git.kernel.org/linus/e1a58320a38dfa72be48a0f1a3a92273663ba6db) is merged in v4.4.
+* [arm64's implementation](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=1404d6f13e47c42f155e3c6a611b1bf4dd35dde9) merged in v4.10.
+* This feature caught EFI regions with RMX permission, which is a perfect place for ret2dir exploit. [A workaround fix](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=67a9108ed4313b85a9c53406d80dc1ae3f8c3e36) merged in v4.6. For the case of kernel with EFI stub, you should ask Spender about situation hardening solution once the ret2dir paper was out.
+
+## Linked list hardening
+
+* It [raise the BUG() when corruption is detected](https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=de54ebbe26bb371a6f1fbc0593372232f04e3107). Merged in v4.10.
+
 ## use-after-free reduction/mitigation
 use-after-free is a very popular bug class in kernel and it can be exploited by the adversary to gain information or priviledges.
 
@@ -111,3 +121,4 @@ Write-up about KSPP:
 * [security things in Linux v4.7](https://outflux.net/blog/archives/2016/10/03/security-things-in-linux-v4-7/)
 * [security things in Linux v4.8](https://outflux.net/blog/archives/2016/10/04/security-things-in-linux-v4-8/)
 * [security things in Linux v4.9](https://outflux.net/blog/archives/2016/12/12/security-things-in-linux-v4-9/)
+* [security things in Linux v4.10](https://outflux.net/blog/archives/2017/02/27/security-things-in-linux-v4-10/)
