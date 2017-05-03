@@ -15,7 +15,7 @@ Kernel is what we called "Ring 0". It's the front line and [the last place we ca
 ## Auxlilary ingredients
 * [CVE-2017-7616/The Infoleak that (Mostly) Wasn't - 201704](https://grsecurity.net/the_infoleak_that_mostly_wasnt.php)
 
-## Silent fixes from Linux kernel "community" ( Welcome to add...)
+## Silent fixes from Linux kernel "community" ( Welcome to add more for fun!)
 * [Multiple vulnerablities being silent fixed: CVE-2017-5546, CVE-2017-5547, CVE-2016-10154, CVE-2017-5548, CVE-2017-5549, CVE-2017-5550, CVE-2017-5551](http://seclists.org/oss-sec/2017/q1/161)
 * [Silently (or obliviously) partially-fixed CONFIG_STRICT_DEVMEM bypass - 201704](http://seclists.org/oss-sec/2017/q2/76)
 
