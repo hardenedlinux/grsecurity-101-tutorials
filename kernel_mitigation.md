@@ -122,3 +122,4 @@ Write-up about KSPP:
 * [security things in Linux v4.8](https://outflux.net/blog/archives/2016/10/04/security-things-in-linux-v4-8/)
 * [security things in Linux v4.9](https://outflux.net/blog/archives/2016/12/12/security-things-in-linux-v4-9/)
 * [security things in Linux v4.10](https://outflux.net/blog/archives/2017/02/27/security-things-in-linux-v4-10/)
+* [security things in Linux v4.11](https://outflux.net/blog/archives/2017/05/02/security-things-in-linux-v4-11/)
