@@ -296,6 +296,8 @@ memory domain](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67dec
 当然了，PaX 的熵是不具备密码学安全性的，但我们时常过于担心熵池中的随机量不够随机导致安全问题，
 而忽略了完全没有熵这个更大的问题。
 
+注意，此选项在 Linux 4.9 中已经合并入 → General setup → GCC plugins → Generate some entropy during boot and runtime (CONFIG\_GCC\_PLUGIN\_LATENT\_ENTROPY)，请在任何情况下打开此选项，防御随机数攻击！
+
 #### [ ] Prevent code reuse attacks
 
 建议选择 N。这个选项能避免代码重用攻击。代码重用攻击是一类相当危险的攻击，在各种代码执行漏洞
@@ -311,10 +313,33 @@ memory domain](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67dec
 
 建议选择 N，否则 PaX 会禁止 /dev/kmem、/dev/mem、和 /dev/port 的读写，同时也禁止写入 CPU 的
 MSR 寄存器，以及移除对 kexec 的支持。这是一项保护内存，特别是内核本身遭到修改的有力措施。
-如今几乎没有什么应用程序直接通过这三个设备直接操作硬件，因此这是一个非常好的选择。然而
-问题在于，CPU 的电源管理需要修改 MSR 寄存器，然而这也被禁止了，因此使用工具查看或修改
+如今几乎没有什么应用程序直接通过这三个设备直接操作硬件，因此这是一个非常好的选择。
+
+然而问题在于，CPU 的电源管理需要修改 MSR 寄存器，然而这也被禁止了，因此使用工具查看或修改
 CPU 电源管理策略将是不可能的（CPU 的调速器依然可以修改，因为这是内核而不是 CPU 的一部分）。
 在一台台式机或工作站上，这完全不是问题；然而对于需要支持笔记本的桌面系统来说只能有所牺牲。
+
+不过，这并不意味着你无法加固你的系统，我们可以调整相应的上游内核选项，对每一个特性进行单独
+的禁用，更细致的进行调整，达到和该 Grsecurity 选项几乎相同的效果：
+
+* → Kernel hacking
+    ** [\*] Filter access to /dev/mem (CONFIG_STRICT\_DEVMEM)
+        *** 打开此选项，来对 /dev/mem 进行基本保护，建议无视该选项，直接关闭 /dev/mem 即可。
+
+* → Device Drivers → Character devices
+    ** [ ] /dev/mem virtual device support (CONFIG_DEVMEM)
+    ** [ ] /dev/kmem virtual device support (CONFIG_DEVKMEM)
+    ** [ ] /dev/port character device (CONFIG_DEVPORT)
+        *** 关闭以上选项，可分别禁用 /dev/kmem、/dev/mem、和 /dev/port 的读写，建议关闭。
+
+* → Processor type and features
+    ** <\*> /dev/cpu/*/msr - Model-specific register support (X86_MSR)
+        *** 关闭此选项，可禁用 MSR 寄存器的支持。为了进行电源管理，建议在桌面上开启。
+    ** [ ] kexec system call (CONFIG_KEXEC)
+    ** [ ] kexec file based system call (CONFIG_KEXEC_FILE)
+        *** 可关闭此选项，禁用 kexec 支持。
+    ** [ ] Kernel Live Patching (CONFIG_LIVEPATCH)
+        *** 此外，还可以额外禁用内核热补丁功能（FIXME：Grsecurity 似乎已经全局禁用了，因此不用配置，主线内核可以配置一下）。
 
 #### [\*] Disable privileged I/O
 
