@@ -34,5 +34,16 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 * No selft-modifying code in hypervisor, code diversification won't work?
 * Block all accesses from guest vm to host I/O ports
 
-# NEVER Use VirtualBox (TODO: quote spender)
+# NEVER Use VirtualBox
+
+Using VirtualBox is STRONGLY DISCOURAGED, you should switch to a KVM-based virtualization.
+
+VirtualBox depends on its kernel moudule to function properly, but the module failed to adopt state-of-art security measures. VirtualBox doesn't support KERNEXEC, UDEREF, RANDKSTACK, or SMAP, as spender once said.
+
+> This will be reverted once the VirtualBox devs stop disabling
+> SMAP unnecessarily, which seems like it will happen never.
+> Anyone who cares about security of their host system shouldn't
+> use VirtualBox, as it already precludes the use of KERNEXEC, UDEREF,
+> and RANDKSTACK.
+
 # Do NOT Use Xen if you can (TODO: quote something)
