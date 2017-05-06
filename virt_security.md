@@ -33,3 +33,6 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 * check few possible backdoor implanted funcs: IDT, hypercall_table, exception_table
 * No selft-modifying code in hypervisor, code diversification won't work?
 * Block all accesses from guest vm to host I/O ports
+
+# NEVER Use VirtualBox (TODO: quote spender)
+# Do NOT Use Xen if you can (TODO: quote something)
