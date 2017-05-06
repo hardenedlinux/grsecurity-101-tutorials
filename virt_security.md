@@ -46,4 +46,14 @@ VirtualBox depends on its kernel moudule to function properly, but the module fa
 > use VirtualBox, as it already precludes the use of KERNEXEC, UDEREF,
 > and RANDKSTACK.
 
-# Do NOT Use Xen if you can (TODO: quote something)
+# AVOID Xen If You Can
+
+Xen is one of the earliest technology for virtualization in Linux kernel, it has many undesirable designs in a security-oriented perspective. Instead of separating or isolating different components, it uses a monolithic and complicated architecture. Any bugs in Dom0 could easily lead to the compromise of the entire system.
+
+Dozens of critical vulnerabilities are discovered from Xen, about one to three each year, allowing the Guest to subvert the Host entirely. 
+
+KVM is not fundamentally more secure than Xen, but has apparently somehow learned from mistakes of Xen, and comes with less vulnerabilities.
+
+See [this paper](https://www.internetsociety.org/sites/default/files/ndss2017_02A-4_Shi_paper.pdf).
+(TODO: more citations)
+
