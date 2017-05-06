@@ -323,22 +323,34 @@ CPU 电源管理策略将是不可能的（CPU 的调速器依然可以修改，
 的禁用，更细致的进行调整，达到和该 Grsecurity 选项几乎相同的效果：
 
 * → Kernel hacking
+
     ** [\*] Filter access to /dev/mem (CONFIG_STRICT\_DEVMEM)
+
         *** 打开此选项，来对 /dev/mem 进行基本保护，建议无视该选项，直接关闭 /dev/mem 即可。
 
 * → Device Drivers → Character devices
+
     ** [ ] /dev/mem virtual device support (CONFIG_DEVMEM)
+
     ** [ ] /dev/kmem virtual device support (CONFIG_DEVKMEM)
+
     ** [ ] /dev/port character device (CONFIG_DEVPORT)
+
         *** 关闭以上选项，可分别禁用 /dev/kmem、/dev/mem、和 /dev/port 的读写，建议关闭。
 
 * → Processor type and features
     ** <\*> /dev/cpu/*/msr - Model-specific register support (X86_MSR)
+
         *** 关闭此选项，可禁用 MSR 寄存器的支持。为了进行电源管理，建议在桌面上开启。
+
     ** [ ] kexec system call (CONFIG_KEXEC)
+
     ** [ ] kexec file based system call (CONFIG_KEXEC_FILE)
+
         *** 可关闭此选项，禁用 kexec 支持。
+
     ** [ ] Kernel Live Patching (CONFIG_LIVEPATCH)
+
         *** 此外，还可以额外禁用内核热补丁功能（FIXME：Grsecurity 似乎已经全局禁用了，因此不用配置，主线内核可以配置一下）。
 
 #### [\*] Disable privileged I/O
