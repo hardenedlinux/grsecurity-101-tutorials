@@ -154,7 +154,7 @@ XATTR\_PAX 现在被广泛使用。
 
 #### [ ] Emulate trampolines
 
-建议选择 N。这个特性是对旧的程序（执行栈里的短代码）的一种 workaround，现在已经不需要。
+建议选择 N。这个特性是对旧的程序（执行栈里的短代码）的一种 workaround，现在已经不需要。Gentoo 必须选择 Y。
 
 #### [?] Restrict mprotect()
 
