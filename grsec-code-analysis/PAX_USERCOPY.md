@@ -57,5 +57,5 @@ if (obj < stack || stackend < obj + len)  /*缓冲区头越过栈顶或缓冲区
 
 ## 案例
 
-######参考资料
+###### 参考资料
 http://www.openwall.com/lists/kernel-hardening/2011/06/26/3
