@@ -9,13 +9,18 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 * [Adventures with a certain Xen vulnerability - 200809](http://invisiblethingslab.com/resources/misc08/xenfb-adventures-10.pdf)
 * Xen 0wning Trilogy - 200808, [I](http://invisiblethingslab.com/resources/bh08/part1.pdf), [II](http://invisiblethingslab.com/resources/bh08/part2-full.pdf), [III](http://invisiblethingslab.com/resources/bh08/part3.pdf)
 * [Attacking Intel® Trusted Execution Technology - 200902](http://invisiblethingslab.com/resources/bh09dc/Attacking%20Intel%20TXT%20-%20paper.pdf)
+* [CLOUDBURST A VMware Guest to Host Escape Story - 200908](http://www.blackhat.com/presentations/bh-usa-09/KORTCHINSKY/BHUSA09-Kortchinsky-Cloudburst-SLIDES.pdf), [paper](http://www.blackhat.com/presentations/bh-usa-09/KORTCHINSKY/BHUSA09-Kortchinsky-Cloudburst-PAPER.pdf) and [video](https://media.blackhat.com/bh-usa-09/video/KORTCHINSKY/BHUSA09-Kortchinsky-Cloudburst-VIDEO.mov)
 
 ## Article/paper
 
 * [IsGameOver(), anyone? - 200708](http://theinvisiblethings.blogspot.com/2007/08/virtualization-detection-vs-blue-pill.html)
 * [Security Challenges in Virtualized Environments - 200804](http://theinvisiblethings.blogspot.com/2008/03/kick-ass-hypervisor-nesting.html), the slide is [here](http://invisiblethingslab.com/resources/rsa08/Security%20Challanges%20in%20Virtualized%20Enviroments%20-%20RSA2008.pdf). Neo swallowed the red pill to enter the Nebuchadnezzar battleship and then he figured out that it's just another Matrix.
 * [Following the White Rabbit: Software Attacks against Intel® VT-d - 201105](http://www.invisiblethingslab.com/resources/2011/Software%20Attacks%20on%20Intel%20VT-d.pdf)
+* Advanced Exploitation of Xen Hypervisor Sysret VM Escape - 2012
+* [Adventures in Xen exploitation - 201502](https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2015/february/adventures-in-xen-exploitation/)
 * [Xen SMEP (and SMAP) bypass Introduction - 201504](https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2015/april/xen-smep-and-smap-bypass/)
+* [VENOM, CVE-2015-3456 - 201505](http://venom.crowdstrike.com/)
+* [VM escape: QEMU Case Study - 201704](http://phrack.org/papers/vm-escape-qemu-case-study.html)
 
 ## Free/libre open source project
 
