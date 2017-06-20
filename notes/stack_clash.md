@@ -1,4 +1,4 @@
-## Story
+## Notes about stack clash
 
 The 3rd "nuclear" bomb named ["The Stack Clash"](https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt) dropped by Qualys to the planet Penguin since the era of "Attacking the core". An old exploit vector being weaponized by the stack clash can target any SUID/SGID programs by exploiting the flaw in guard-page and automatic stack expansion feature. From [Grsecurity's blog](https://grsecurity.net/an_ancient_kernel_hole_is_not_closed.php)( another ["An Ancient Kernel Hole is (Not) Closed" in LWN](https://lwn.net/Articles/400746/)), we can see there are some silent fixes[1](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=320b2b8de12698082609ebbc1a17165727f4c893) [2](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=09884964335e85e897876d17783c2ad33cf8a2e0) by Linus Torvalds( as always). Let's see the summary about defensive mitigation:
 
