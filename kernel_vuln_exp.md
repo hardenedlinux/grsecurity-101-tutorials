@@ -4,6 +4,10 @@
 
 Kernel is what we called "Ring 0". It's the front line and [the last place we can defense the those underneath adversaries](https://github.com/hardenedlinux/hardenedlinux_profiles/raw/master/slide/hardening_the_core.pdf) effectively. Unfortunately, most people from [FLOSS world lost their rights to access PaX/Grsecurity](https://hardenedlinux.github.io/announcement/2017/04/29/hardenedlinux-statement2.html)'s stable and test patch, which is the only effective defense solution. KSPP is making the progress slowly and more bugs being introduced by misunderstanding some PaX/Grsecurity features and missing the context why PaX/Grsecurity created them in the 1st place. Some vulnerablities and exploits( Since KSPP started) targetting linux kernel in the wild will be listed here and most of them can be mitigated by PaX/Grsecurity without any fix.
 
+## Exploit vectors
+* [offset2lib](https://cybersecurity.upv.es/attacks/offset2lib/offset2lib.html)
+* [The Stack Clash](https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt), [notes](https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/notes/stack_clash.md)
+
 ## Privilege Escalation
 * [Analysis and Exploitation of a Linux Kernel Vulnerability (CVE-2016-0728) - 201601](http://perception-point.io/2016/01/14/analysis-and-exploitation-of-a-linux-kernel-vulnerability-cve-2016-0728/)
 * [CVE-2016-1583/Linux: Stack overflow via ecryptfs and /proc/$pid/environ - 201607](https://bugs.chromium.org/p/project-zero/issues/detail?id=836)
