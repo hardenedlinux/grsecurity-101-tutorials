@@ -113,10 +113,12 @@ void __init sched_init(void)
 +#endif
 ```
 从代码上来看，这个补丁代表着，若栈指针距离内核栈的 thread_info 不足一个页（guard page）的大小，说明任何栈上的读写操作会覆写到内核栈，触发报错。  
-其实指针检查是发生在缺页错中再次触发错误时进行的检查（例如缺页错误发生后发现对该内存无访问权限？），也就是所谓的 doluble_fault。而对进程内核栈的 page_guard 的访问，恰恰就会触发这个检查，也就是任何访问读写 guard page 的行为，都会被捕捉并且检查，若小于一个页大小引发报错。  
+其实指针检查是发生在缺页错中再次触发错误时进行的检查（例如缺页错误发生后发现对该内存无访问权限？），也就是所谓的 double_fault。而对进程内核栈的 page_guard 的访问，恰恰就会触发这个检查，也就是任何访问读写 guard page 的行为，都会被捕捉并且检查，若小于一个页大小引发报错。  
 主线内核的相应实现是触发后检查 cr2 寄存器，这个寄存器保存了访问缺页的地址。  
-近期由 Qualys 曝光的攻击方式展示了如何绕过 kernel 这个安全特性，就是保持栈指针不触及 page_fault 来绕过越过栈的越界检查。（然而并没有打穿 Pax/Grsecurity 加固的内核）  
-详细的信息可以参考这篇文章：https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt
+近期由 Qualys 曝光的攻击方式展示了如何绕过用户空间的guard page，就是保持栈指针不触及 page-fault 来绕过越过栈的越界检查。Grsecurity的blog提及用相似的方法绕过内核栈检查。  
+###### 相关参考资料
+- https://www.grsecurity.net/an_ancient_kernel_hole_is_not_closed.php
+- https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt
 
 ## 内存操作时一些指针的检查
 ### virt_to_page 地址合法性检查
