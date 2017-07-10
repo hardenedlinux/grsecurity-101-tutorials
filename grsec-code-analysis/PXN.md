@@ -1,6 +1,7 @@
 # Privileged execute-never( PXN)
 ## 简述
-PXN 是一个防止用户空间代码被内核空间执行的安全特性。在 ARMv7 的硬件支持下，通过 PXN 比特位的设定，决定该页的内存是否可被内核执行，可有效防止 ret2usr 攻击。
+PXN 是一个防止用户空间代码被内核空间执行的安全特性。在 ARMv7 的硬件支持下，通过 PXN 比特位的设定，决定该页的内存是否可被内核执行，可有效防止 ret2usr 攻击。ret2usr防护最早是基于2004年PaX发布的KERNEXEC和2007年发布的UDEREF,而最早利用[ARMv7的PXN特性的是在2013年的PaX 3.x版本中](https://grsecurity.net/recent_arm_security_improvements.php)，随后linux mainline于[3.18使用](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1e6b48116a95046ec51f3d40f83aff8b006674d7)。
+
 ## 实现
 首先， PXN 位的硬件信息定义在 pgtable-2level-hwdef.h 中，在页表目录中：
 ```
@@ -36,6 +37,7 @@ if (cpu_arch == CPU_ARCH_ARMv7 &&
 #define CPUID_EXT_MMFR0  "c1, 4"
 ```
 MMFR 表示内存模式特性寄存器( Memory Model Feature register)  
+
 ###### 参考资料
-https://patchwork.kernel.org/patch/5539521/
-https://www.spinics.net/lists/arm-kernel/msg381717.html
+https://patchwork.kernel.org/patch/5539521/  
+https://www.spinics.net/lists/arm-kernel/msg381717.html  
