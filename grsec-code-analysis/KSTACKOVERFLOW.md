@@ -7,7 +7,7 @@ Grsecurity 的 KSTACKOVERFLOW 特性是针对进程内核栈溢出的一些加�
 - 一些配合性的初始化
 
 ## 创建进程时內核栈的初始化  
-这个部分主要介绍 GRSEURITY_KSTACKOVERFLOW 针对内核栈做了两个方面的加固，一个是基于 Pax 的实现将 thread_info 分离出去，另一个是栈空间虚拟映射，提高安全性。（[Pax 的实现参考这里](kstack.md)）  
+这个部分主要介绍 GRSEURITY_KSTACKOVERFLOW 针对内核栈做了两个方面的加固，一个是基于 Pax 的实现将 thread_info 分离出去，另一个是栈空间虚拟映射，提高安全性。（[PaX的实现参考这里](kstack.md)）  
 路线： do_fork -> copy_process_task_struct -> dup_task_struct -> gr_alloc_stack_node
 dup_task_struct 函数是进程在 fork 初始化时被调用的，他和进程栈的初始化有关：
 ```
