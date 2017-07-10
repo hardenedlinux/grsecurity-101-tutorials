@@ -112,6 +112,12 @@ arm64 also [moved thread_info off the stack in v4.10](http://git.kernel.org/cgit
 ## [GRKERNSEC_PERF_HARDEN](https://lwn.net/Articles/695978/)
 PERF is a fuc*ing serious attack surface. We can't bear it running by default in production system. Ben Hutchings [proposed a patch](https://lkml.org/lkml/2016/1/11/587) from PaX/Grsecurity to linux kernel but it rejected by kernel maintainer. Fortunately, Jeff Vander Stoep [merged it into AOSP kernel](https://android-review.googlesource.com/#/c/234573/).
 
+## single/per-task stack canary entropy
+Linux kernel has been using weak entropy on stack canary for years and it has been [fixed( copy+paste from PaX/Grsecurity) and merged in v4.12](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=5ea30e4e58040cfd6434c2f33dc3ea76e2c15b05), while PaX/Grsecurity solved it since 2011.
+
+## heap/stack gap protection
+[An old problem](https://grsecurity.net/an_ancient_kernel_hole_is_not_closed.php) has been weaponized and named as ["Stack Clash"](https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt) from excellent security research by Qualys. Linux mainline kernel [had a fix](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=1be7107fbe18eed3e319a6c3e83c78254b693acb) which copy+paste some code from PaX/Grsecurity written in 2010. All in all, [PaX/Grsecurity mitigate this whole exploit vector](https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/notes/stack_clash.md) since 2010.
+
 
 Write-up about KSPP:
 * [security things in Linux v4.3](https://outflux.net/blog/archives/2016/09/26/security-things-in-linux-v4-3/)
@@ -123,3 +129,4 @@ Write-up about KSPP:
 * [security things in Linux v4.9](https://outflux.net/blog/archives/2016/12/12/security-things-in-linux-v4-9/)
 * [security things in Linux v4.10](https://outflux.net/blog/archives/2017/02/27/security-things-in-linux-v4-10/)
 * [security things in Linux v4.11](https://outflux.net/blog/archives/2017/05/02/security-things-in-linux-v4-11/)
+* [security things in Linux v4.12](https://outflux.net/blog/archives/2017/07/10/security-things-in-linux-v4-12/)
