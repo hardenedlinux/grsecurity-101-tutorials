@@ -13,6 +13,8 @@ Grsecurity 使用的技术手段包括智能访问控制、通过防御内存破
 - [面向桌面的 PaX/Grsecurity 配置详细注释与评论](grsec-kernel-full-commentary.md)
 - [在桌面 GNU/Linux 上使用 PaX/Grsecurity 的一点经验](grsec-desk-notes.md)
 - [Linux kernel mitigation checklist](kernel_mitigation.md)
+- [Linux kernel vulnerablity & exploitation & silent fixes](https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/kernel_vuln_exp.md)
+- [PaX/Grsecurity相关特性分析](https://github.com/hardenedlinux/grsecurity-101-tutorials/tree/master/grsec-code-analysis)
 
 ## 授权
 
