@@ -231,7 +231,7 @@ thread_info 移除出栈后，Pax 又在 thread_info 里维护了一个 lowest_s
  	struct task_struct *me = current;
  
 -	p->thread.sp0 = (unsigned long)task_stack_page(p) + THREAD_SIZE;
-+	p->thread.sp0 = (unsigned long)task_stack_page(p) + THREAD_SIZE - 16;/* 16byte 是栈底填充？*/
++	p->thread.sp0 = (unsigned long)task_stack_page(p) + THREAD_SIZE - 16;/* 16byte 和 PaX 实现的栈随机化有关*/
  	childregs = task_pt_regs(p);
  	p->thread.sp = (unsigned long) childregs;
 +	p->tinfo.lowest_stack = (unsigned long)task_stack_page(p) + 2 * sizeof(unsigned long);
@@ -241,7 +241,7 @@ thread_info 移除出栈后，Pax 又在 thread_info 里维护了一个 lowest_s
 +	BUG_ON(p->thread.ss == __UDEREF_KERNEL_DS); /*检查*/
  	...
 ```
-这里看起来是在栈顶和栈底都填充了 16byte，可能是关系 overflow 探测的设置？  
+这里在栈底（高地址）都填充了 16byte，原因是 PaX 实现的内核栈随机化需要向上偏移，否则随机化掩码后会越过栈底，相关可以[参考这里](PAX_RANDKSTACK.md)。这里栈顶也填充了 16-byte，似乎和栈放置 overflow 探测有关  
 
 获取 thread_info 的函数要做相应修改：
 ```
