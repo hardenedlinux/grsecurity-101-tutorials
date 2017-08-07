@@ -22,6 +22,7 @@ Kernel is what we called "Ring 0". It's the front line and [the last place we ca
 * [CVE-2016-10277/CVE-2017-1000363, initroot: Bypassing Nexus 6 Secure Boot through Kernel Command-line Injection](https://alephsecurity.com/2017/05/23/nexus6-initroot/)
 
 ## Silent fixes from Linux kernel "community" ( Welcome to add more for fun!)
+* [kernel: inotify: a race between inotify_handle_event() and sys_rename(): CVE-2017-7533 - 20170803](http://seclists.org/oss-sec/2017/q3/240)
 * [Multiple silent fixes done by Linux kernel "community": "More CONFIG_VMAP_STACK vulnerabilities, refcount_t UAF, and an
  ignored Secure Boot bypass / rootkit method"](http://www.openwall.com/lists/oss-security/2017/06/24/1)
 * [Silently (or obliviously) partially-fixed CONFIG_STRICT_DEVMEM bypass - 201704](http://seclists.org/oss-sec/2017/q2/76)
