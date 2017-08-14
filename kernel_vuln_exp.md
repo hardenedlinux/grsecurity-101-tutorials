@@ -16,6 +16,7 @@ Kernel is what we called "Ring 0". It's the front line and [the last place we ca
 * [Linux kernel: CVE-2017-6074: DCCP double-free vulnerability (local root) - 201702](http://seclists.org/oss-sec/2017/q1/471)
 * [CVE-2017-7184/PWN2OWN 2017 Linux 内核提权漏洞分析](https://zhuanlan.zhihu.com/p/26674557)
 * [sudo-CVE-2017-1000367 - 201706](https://github.com/c0d3z3r0/sudo-CVE-2017-1000367)
+* [CVE-2017-1000112: Exploitable memory corruption due to UFO to non-UFO path switch - 20170813](http://www.openwall.com/lists/oss-security/2017/08/13/1), [PoC](https://github.com/xairy/kernel-exploits/blob/master/CVE-2017-1000112/poc.c)
 
 ## Auxlilary ingredients
 * [CVE-2017-7616/The Infoleak that (Mostly) Wasn't - 201704](https://grsecurity.net/the_infoleak_that_mostly_wasnt.php)
