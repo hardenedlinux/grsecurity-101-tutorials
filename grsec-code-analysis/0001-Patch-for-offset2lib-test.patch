@@ -1,0 +1,54 @@
+From 7680a8d5c5f949cc27ec5fb16fcba38999c7ccf1 Mon Sep 17 00:00:00 2001
+From: Kaipeng <kaipeng94@gmail.com>
+Date: Sun, 20 Aug 2017 18:18:04 +0800
+Subject: [PATCH] Patch for offset2lib test
+
+---
+ fs/Kconfig      | 9 +++++++++
+ fs/binfmt_elf.c | 9 +++++++--
+ 2 files changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/fs/Kconfig b/fs/Kconfig
+index 4bd03a2b0518..4940d83fa9a1 100644
+--- a/fs/Kconfig
++++ b/fs/Kconfig
+@@ -49,6 +49,15 @@ config FS_DAX
+ 	  or if unsure, say N.  Saying Y will increase the size of the kernel
+ 	  by about 5kB.
+ 
++config DYN_BASE_SEPARATE
++	bool "Separate the ET_EXEC from DYN"
++	def_bool n
++
++config DYN_BASE_RAND
++	bool "ET_EXEC base randomize"
++        depends on DYN_BASE_SEPARATE
++	def_bool n
++
+ config FS_DAX_PMD
+ 	bool
+ 	default FS_DAX
+diff --git a/fs/binfmt_elf.c b/fs/binfmt_elf.c
+index 2472af2798c7..0f31e5f4cee5 100644
+--- a/fs/binfmt_elf.c
++++ b/fs/binfmt_elf.c
+@@ -918,9 +918,14 @@ static int load_elf_binary(struct linux_binprm *bprm)
+ 			 * default mmap base, as well as whatever program they
+ 			 * might try to exec.  This is because the brk will
+ 			 * follow the loader, and is not movable.  */
++			load_bias = 0;
++			#ifdef CONFIG_DYN_BASE_SEPARATE 
+ 			load_bias = ELF_ET_DYN_BASE - vaddr;
+-			if (current->flags & PF_RANDOMIZE)
+-				load_bias += arch_mmap_rnd();
++			#ifdef CONFIG_DYN_BASE_RAND
++                        load_bias += arch_mmap_rnd();
++                        #endif
++			#endif
++
+ 			load_bias = ELF_PAGESTART(load_bias);
+ 			total_size = total_mapping_size(elf_phdata,
+ 							loc->elf_ex.e_phnum);
+-- 
+2.11.0
+

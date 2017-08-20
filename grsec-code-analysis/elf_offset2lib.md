@@ -497,3 +497,9 @@ out_free_ph:
 ```  
 可以看到的时，早在 PaX 针对 v3.16 给出的 Patch 中（也许其实还更早呢）,我们就可以看到首先 PaX 给 load_bias 加上了 PAX_DELTA_MMAP_LEN 个比特位的随机化，在这个基础上再移到以 PAX_ELF_ET_DYN_BASE 为基址的地方，这就将代码和共享库分离开，并且加上了随机化的成分。这是最早针对 offset2lib 的修补，后续其他的修补实现也都很相似，都是分离和随机化。  
 虽然这个修补放在 PAX_RANDMMAP 之下，而真正的 PAX_RANDMMAP 的安全特性远不止此，我们会在别的文档里面讨论。
+
+### 相关测试代码
+由于新版本的内核已经修复，使用老版本编译测试可能会遇到兼容问题，这里给出一个[针对 v4.9.0 的补丁](0001-Patch-for-offset2lib-test.patch)方便在新版本的内核下面直接进行 offset2libc 的测试。  
+* 默认配置是可以进行 offset2lib 的，可以使用[这个程序](https://cybersecurity.upv.es/attacks/offset2lib/get_offset2lib.tgz)计算偏移量。
+* 在`make menuconfig`打开 `File systems --> Separate the ET_EXEC from DYN` 会看到 ET_EXEC 类的可执行文件代码段会被映射到分离的固定地址（通过 `cat /proc/$(PID)/maps` 查看）。
+* 再打开 `ET_EXEC base randomize` 选项时则和新版的内核一样。
