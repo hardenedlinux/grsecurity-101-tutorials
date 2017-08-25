@@ -85,7 +85,7 @@ load_elf_binary 中把 bprm.p 传递给了进程的 current->mm->start_stack
 其实 bprm.p 随机化初始化后，并不会以上述这种形式直接对 current->mm->start_stack 赋值，还需经过setup_arg_pages 这些的操作以后才会显式赋值给 current->mm->start_stack，而 setup_arg_pages 中用到bprm.p 增长栈的时候都会update这个数据。下面我们会继续看这部分的代码。
 
 ### 初始化时的update
-第二不出现在 setup_arg_pages() 函数被调用的时候，这个函数的调用是为了把先前存在内核物理栈页(do_execve_common的几个copy_string从拷贝进kernel)中的内容复制到进程地址空间(复制一些参数,环境变量等)。通常,栈顶是取决于 STACK_TOP 这个参数，PAX 会对是个变量进行一定偏移量的随机化( delta_stack )
+第二步出现在 setup_arg_pages() 函数被调用的时候，这个函数的调用是为了把先前存在内核物理栈页(do_execve_common的几个copy_string从拷贝进kernel)中的内容复制到进程地址空间(复制一些参数,环境变量等)。通常,栈顶是取决于 STACK_TOP 这个参数，PAX 会对是个变量进行一定偏移量的随机化( delta_stack )
 在 load_elf_binary 函数中:
 ```
 retval = setup_arg_pages(bprm, randomize_stack_top(STACK_TOP),
