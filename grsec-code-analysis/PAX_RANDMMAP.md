@@ -203,14 +203,15 @@ gap获取到的是进程最小的栈大小，和 MIN/MAX_GAP 比对以后，将�
 
 	......
 
+#ifndef CONFIG_PAX_RANDMMAP
 	if ((current->flags & PF_RANDOMIZE) && (randomize_va_space > 1)) {
-		/* 这里引入第二个随机化 */
 		current->mm->brk = current->mm->start_brk =
 			arch_randomize_brk(current->mm);
 #ifdef compat_brk_randomized
 		current->brk_randomized = 1;
 #endif
 	}
+#endif
 ```  
 第一个随机化被来自 load_bias 的随机化，这个值被 PaX 通过宏选项覆盖。第二个随机化被 PaX 通过宏选项在编译时忽略。删除这部分代码重编 kernel 可以看到每次 malloc 申请到的地址是固定的，也就是堆的基址是固定的。
 
