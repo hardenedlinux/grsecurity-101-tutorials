@@ -108,7 +108,7 @@ Jon Oberheide shared about [kernel stack attack surfaces](https://jon.oberheide.
 * [sched/core: Free the stack early if CONFIG_THREAD_INFO_IN_TASK](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=68f24b08ee892d47bdef925d676e1ae1ccc316f8)
 * [fork: Optimize task creation by caching two thread stacks per CPU if CONFIG_VMAP_STACK=y](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=ac496bf48d97f2503eaa353996a4dd5e4383eaf0)
 
-arm64 also [moved thread_info off the stack in v4.10](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c02433dd6de32f042cf3ffe476746b1115b8c096).
+arm64 also [moved thread_info off the stack in v4.10](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c02433dd6de32f042cf3ffe476746b1115b8c096) and implemented [vmap](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=e3067861ba6650a566a6273738c23c956ad55c02) [stack](872d8327ce8982883b8237b2c320c8666f14e561) in v4.14.
 
 ## [GRKERNSEC_PERF_HARDEN](https://lwn.net/Articles/695978/)
 PERF is a fuc*ing serious attack surface. We can't bear it running by default in production system. Ben Hutchings [proposed a patch](https://lkml.org/lkml/2016/1/11/587) from PaX/Grsecurity to linux kernel but it rejected by kernel maintainer. Fortunately, Jeff Vander Stoep [merged it into AOSP kernel](https://android-review.googlesource.com/#/c/234573/).
