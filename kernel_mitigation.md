@@ -122,6 +122,10 @@ Linux kernel has been using weak entropy on stack canary for years and it has be
 ## FORTIFY_SOURCE for linux kernel
 Buffer overflow were popular back in old days and [gcc/glibc introduced a mitigation is called "FORTIFY_SOURCE"](https://gcc.gnu.org/ml/gcc-patches/2004-09/msg02055.html) perform some detections during compile time and runtime( compiler left a wrapper func do the runtime check) due to different circumstances back in 2004. Arjan van de Ven [implemented it for linux kernel in 2005](https://lkml.org/lkml/2005/5/25/46) but it never make it to the upstream back then. A few years after, PaX team/Spender did an [experimental version of FORTIFY_SOURCE](https://grsecurity.net/~spender/dev_patches/fortify_source_30_percent_coverage_sucks.patch) based on Arjan's code in 2009 but they chose not to merge it in PaX/Grsecurity due to some reasons, e.g: a little security profit vs. perf impact. This feature being [coincidental implementation and merged in v4.13 lately](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=6974f0c4555e285ab217cee58b6e874f776ff409).
 
+# STATIC_USERMODEHELPER
+
+Greg Kroah-Hartman proposed this feature to prevent the modification of data at runtime and it's [merged in v4.11](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=64e90a8acb8590c2468c919f803652f081e3a4bf). Not sure if he "borrow" the code from what PaX/Grsecurity does in kernel/kmod.c back in 2013.
+
 Write-up about KSPP:
 * [security things in Linux v4.3](https://outflux.net/blog/archives/2016/09/26/security-things-in-linux-v4-3/)
 * [security things in Linux v4.4](https://outflux.net/blog/archives/2016/09/27/security-things-in-linux-v4-4/)
@@ -133,3 +137,4 @@ Write-up about KSPP:
 * [security things in Linux v4.10](https://outflux.net/blog/archives/2017/02/27/security-things-in-linux-v4-10/)
 * [security things in Linux v4.11](https://outflux.net/blog/archives/2017/05/02/security-things-in-linux-v4-11/)
 * [security things in Linux v4.12](https://outflux.net/blog/archives/2017/07/10/security-things-in-linux-v4-12/)
+* [security things in Linux v4.13](https://outflux.net/blog/archives/2017/09/05/security-things-in-linux-v4-13/)
