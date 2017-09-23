@@ -7,6 +7,7 @@ Kernel is what we called "Ring 0". It's the front line and [the last place we ca
 ## Exploit vectors
 * [offset2lib](https://cybersecurity.upv.es/attacks/offset2lib/offset2lib.html)
 * [The Stack Clash](https://www.qualys.com/2017/06/19/stack-clash/stack-clash.txt), [notes](https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/notes/stack_clash.md)
+* [Kernel Driver mmap Handler Exploitation](https://labs.mwrinfosecurity.com/publications/kernel-driver-mmap-handler-exploitation/)
 
 ## Privilege Escalation
 * [Analysis and Exploitation of a Linux Kernel Vulnerability (CVE-2016-0728) - 201601](http://perception-point.io/2016/01/14/analysis-and-exploitation-of-a-linux-kernel-vulnerability-cve-2016-0728/)
