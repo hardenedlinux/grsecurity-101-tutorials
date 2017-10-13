@@ -1,7 +1,7 @@
 # PaX/Grsecurity 代码分析  
 ## 简介  
 这个目录主要是针对 PaX/Grsecurity 的代码分析的文档, 这个文档是针对这部分文档的简介。
-PaX/Grsecurity 是一组针对 Linux Kernel 的加固补丁。他的关注点不是具体的漏洞危险，而是减小内核的攻击平面。主要透过访问控制、基于 Memory corruption 漏洞利用的防御等手段，来提高系统的安全性。
+PaX/Grsecurity是一组针对Linux Kernel的加固补丁，跟“传统”的基于LSM( SELinux/AppArmor/etc)不同的是PaX/GRsecurity不仅是具备RBAC对权限以及信息流的控制，而是通过一系列的安全改进让Linux内核在为用户空间提供防御能力( ASLR/PAGEEXEC/SEGEXEC/etc)的同时内核本身的防护能力也大大加强，PaX/GRsecurity作为整个系统安全防御领域最重要的起源，[不仅仅影响了Linux内核](https://hardenedlinux.github.io/system-security/2015/05/17/grsec-interview.html)，也大大的影响了Windows以及BSD内核的安全特性，甚至影响了包含Intel和ARM系列处理器在内的硬件厂商，在可预见的未来必然会影响[RISC-V的安全特性](https://github.com/hardenedlinux/embedded-iot_profile/blob/master/docs/riscv/riscv_security.md)支持，由于Linux内核社区多年以来都奉行"A bug is bug"和"security through obscurity"的哲学导致了Linux内核自第一枚核弹null-ptr ref利用方式曝光后进入了“隐蔽战争纪元”，大规模利用安全事件持续性危害着数据中心的GNU/Linux用户，后来随着Android手机的崛起因为其使用的是Linux内核而必须承受极大风险，下一个受害者或许是嵌入式设备( Internet of Shxt)，虽然在[2015年华盛顿邮报向公众曝光了Linux安全真相](http://www.washingtonpost.com/sf/business/2015/11/05/net-of-insecurity-the-kernel-of-the-argument/)后Linux内核社区迫于Linux基金会的压力成立了KSPP（内核自防护项目），KSPP的参与者大多为Linux基金会的客户（Google/RedHat/Intel/etc)，参与者基在移植PaX/GRsecurity的某些特性或者代码级加固的过程中多次没有理解代码造成的抄袭错误引入了新的漏洞，加上一些其他社区政治因素导致PaX/GRsecurity停止公开下载，HardenedLinux社区认为这一切的罪魁祸首是Linux基金会，在这篇“[方舟之役](https://hardenedlinux.github.io/announcement/2017/04/29/hardenedlinux-statement2.html#%E6%96%B9%E8%88%9F%E4%B9%8B%E5%BD%B9)”的申明中已经有详细的阐述这里不再描述。过去的17年中PaX/GRsecurity对自由软件社区和内核安全领域的巨大贡献但并不是被很多技术人员所了解，这是HardenedLinux社区公开一些PaX/GRsecurity特性的代码分析的主要原因，也算是对社区的馈赠。
 
 ##### PaX 部分  
 PaX 部分主要是针对内核 Memory corruption 的漏洞利用的防御补丁。PaX 的特性有大的完整特性,比如整个 ASLR 实现,也有零散的针对加固特性。下面的文档会把特性进行归类,并做相应简介,尽可能勾画出某个特性在整体加固中发挥的作用,方便后续文档阅读。
