@@ -17,10 +17,13 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 * [Security Challenges in Virtualized Environments - 200804](http://theinvisiblethings.blogspot.com/2008/03/kick-ass-hypervisor-nesting.html), the slide is [here](http://invisiblethingslab.com/resources/rsa08/Security%20Challanges%20in%20Virtualized%20Enviroments%20-%20RSA2008.pdf). Neo swallowed the red pill to enter the Nebuchadnezzar battleship and then he figured out that it's just another Matrix.
 * [Following the White Rabbit: Software Attacks against Intel® VT-d - 201105](http://www.invisiblethingslab.com/resources/2011/Software%20Attacks%20on%20Intel%20VT-d.pdf)
 * Advanced Exploitation of Xen Hypervisor Sysret VM Escape - 2012
+* [CAIN: Silently Breaking ASLR in the Cloud](https://www.usenix.org/system/files/conference/woot15/woot15-paper-barresi.pdf)
 * [Adventures in Xen exploitation - 201502](https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2015/february/adventures-in-xen-exploitation/)
 * [Xen SMEP (and SMAP) bypass Introduction - 201504](https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2015/april/xen-smep-and-smap-bypass/)
 * [VENOM, CVE-2015-3456 - 201505](http://venom.crowdstrike.com/)
 * [VM escape: QEMU Case Study - 201704](http://phrack.org/papers/vm-escape-qemu-case-study.html)
+* [Attacking a co-hosted VM: A hacker, a hammer and two memory modules](https://thisissecurity.stormshield.com/2017/10/19/attacking-co-hosted-vm-hacker-hammer-two-memory-modules/)
+* [Sicherheitsanalyse KVM (Kernel-based Virtual Machine)](https://www.bsi.bund.de/DE/Publikationen/Studien/Sicherheitsanalyse_KVM/sicherheitsanalyse_kvm.html)
 
 ## Free/libre open source project
 
@@ -38,6 +41,8 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 * check few possible backdoor implanted funcs: IDT, hypercall_table, exception_table
 * No selft-modifying code in hypervisor, code diversification won't work?
 * Block all accesses from guest vm to host I/O ports
+* KSM: perf trade-off
+* Proper entropy bits to aginst brute-force
 
 # NEVER Use VirtualBox
 
