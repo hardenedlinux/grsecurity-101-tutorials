@@ -514,16 +514,17 @@ plugin_init 将 kernexec_instrument_fptr 初始化为 kernexec_instrument_fptr_b
 
 kernexec_fptr_execute：用 for 循环调用 kernexec_instrument_fptr 置位所有内核函数指针地址的最高位，kernexec_instrument_fptr 在 plugin_init 中被初始化好为具体实现：
 * kernexec_instrument_fptr_bts：置位函数地址最高位。
-* kernexec_instrument_fptr_or：设置 r12 寄存器为函数地址掩码（函数地址），gimple_build_asm_vec 可以找到插入修正地址的内联汇编（“orq %%r12, %0\n\t" : "=r"(new_fptr) : "0"(old_fptr)”）。
+* kernexec_instrument_fptr_or：设置 r12 寄存器为函数地址掩码，gimple_build_asm_vec 可以找到插入修正地址的内联汇编（“orq %%r12, %0\n\t" : "=r"(new_fptr) : "0"(old_fptr)”）。
 
 kernexec_retaddr_execute：用 for 循环调用 kernexec_retaddr_execute 检查返回地址，kernexec_retaddr_execute 在 plugin_init 中被初始化好为具体实现：
 * kernexec_instrument_retaddr_bts：在函数返回前添加 btsq $63,(%rsp)
 * kernexec_instrument_retaddr_or： 在函数返回前添加 orq %r12,(%rsp)
 
-bts 的设置基于内核处于高地址，设置完这些位并不会对内核的函数指针有影响，而用户空间的地址经过设置后会变成非法地址导致错误，而 or 则是带有地址信息的掩码，用户空间的指针经过掩码也会变成非法地址，这样就能防止内核执行流引向用户空间。
+两种设置都基于内核处于高地址，设置完这些位并不会对内核的函数指针有影响，而用户空间的地址经过设置后会变成非法地址导致错误，这样就能防止内核执行流引向用户空间。
 
 kernexec_reload_execute： 当有汇编代码操作到 r12 寄存器的时候，调用 kernexec_reload_fptr_mask 重新修复好 r12 的值。
 
+尽管 PaX 在 gcc-plugin 这部分的代码注释比较详细，代码结构也不复杂，这里我们还是为 [kernexec_plugin.c](kernexec_plugin.c) 增加一些注释，有助于理解，以供参考。
 相应的，在一些场景中，需要修改内核代码，对 r12 寄存器做现场保护，这里举出调度切换内核进程栈的现场保护，其他不再赘述:
 ```  
 /*

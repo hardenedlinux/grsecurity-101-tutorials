@@ -73,7 +73,7 @@ PAX_REDCOUNT 的实现非常简单,是在原子操作相关的 atomic_* 函数�
 #### 简介  
 PAX_KERNEXEC/PAX_UDEREF 是 PaX 率先实现的,针对 ret2usr 这类漏洞利用的防御的特性。这组防护特性有效的防止内核执行流重定向到位于用户空间的内存。在 PaX 实现多年以后,受到启发的硬件厂商也提供了相应的硬件支持来防御 ret2usr,但是 PAX_KERNEXEC/PAX_UDEREF 依然是最为强悍的实现。
 #### 设计实现
-1. PAX_KERNEXEC
+1. [PAX_KERNEXEC](PAX_KERNEXEC.md) 内核版的 PAGEEXEC/MPROTECT
 2. PAX_UDEREF
 3. smep/smap 是 x86_64 上的硬件支持
 4. [PXN](PXN.md)/PAN 是 ARM v7 以后的硬件支持
