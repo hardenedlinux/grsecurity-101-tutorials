@@ -565,10 +565,77 @@ ENDPROC(__switch_to_asm)
 ```  
 [这篇文章](https://lwn.net/Articles/712161/)讨论了一些关于 KERNEXEC gcc-plugin 的设计问题，供读者参阅。
 
+## efi 相关
+固件 EFI 提供了内核运行时的调用接口，称为 EFI runtime service，以使用运行时服务接口将 EFI 置为虚拟模式( virtual mode)为例，调用路径如下：  
+`start_kernel -> efi_enter_virtual_mode -> __efi_enter_virtual_mode -> phys_efi_set_virtual_address_map ->  	efi_call_phys_prolog/efi_call_phys_epilog`
+这里我们以 i386 的实现为例
+```  
+static efi_status_t __init phys_efi_set_virtual_address_map(
+	unsigned long memory_map_size,
+	unsigned long descriptor_size,
+	u32 descriptor_version,
+	efi_memory_desc_t *virtual_map)
+{
+	efi_status_t status;
+	unsigned long flags;
+	pgd_t *save_pgd;
+
+	save_pgd = efi_call_phys_prolog();
+
+	/* Disable interrupts around EFI calls: */
+	local_irq_save(flags);
+	/* 这里调用 set_virtual_address_map 将 efi 设置为虚拟地址模式 
+	 * efi_call_phys 是物理地址形式去调用 efi 的服务
+	 */
+	status = efi_call_phys(efi_phys.set_virtual_address_map,
+			       memory_map_size, descriptor_size,
+			       descriptor_version, virtual_map);
+	local_irq_restore(flags);
+
+	efi_call_phys_epilog(save_pgd);
+
+	return status;
+}
+```  
+由于将 efi 映射到内存，PaX 在进入调用 efi_call_phys 之前，先把 EFI 的代码段和数据段相关置位（RO & NX）写入到 GDT 项中（退出的时候则由 efi_call_phys_epilog 承担相反的工作）：
+```  
+ /* 对 bios 而言，类似的设置在 bios32_service 中 
+  * 对 64-bit 的机器而言，相应的设置函数名是一样的，在 /arch/x86/platform/efi/efi_64.c 下
+  * 但是基于分页机制去做这个权限的限制
+  */
+pgd_t * __init efi_call_phys_prolog(void)
+{
+	struct desc_ptr gdt_descr;
+	pgd_t *save_pgd;
+
+#ifdef CONFIG_PAX_KERNEXEC
+	struct desc_struct d;
+#endif
+
+	......
+	load_cr3(initial_page_table);
+	__flush_tlb_all();
+
+#ifdef CONFIG_PAX_KERNEXEC
+	/* pack_descriptor 承担了将标志位，地址，范围等信息转化为 GDT 项
+	 * 注意参数 type、limit 的值，查阅 segment descriptor 的
+	 * 可以发现是针对代码段和数据段的置位
+	 */
+	pack_descriptor(&d, 0, 0xFFFFF, 0x9B, 0xC);
+	write_gdt_entry(get_cpu_gdt_table(0), GDT_ENTRY_KERNEXEC_EFI_CS, &d, DESCTYPE_S);
+	pack_descriptor(&d, 0, 0xFFFFF, 0x93, 0xC);
+	write_gdt_entry(get_cpu_gdt_table(0), GDT_ENTRY_KERNEXEC_EFI_DS, &d, DESCTYPE_S);
+#endif
+
+	......
+
+	return save_pgd;
+}
+```  
+相应的，我们可以在 efi_call_phys( /arch/x86/platform/efi/efi_stub_32.S)的实现中看到，PaX 会将运行时的一些寄存器切换到 __KERNEXEC_EFI_DS 段，关闭分页机制，使用物理地址直接访问调用 EFI 的 set_virtual_address_map 服务，开启虚拟地址模式，后续的 efi_enter_virtual_mode 将 EFI 的服务重映射到虚拟地址，基于分页机制设置 pte 性质，后续内核申请服务直接使用 efi_call_virt 来调用服务。
+
 ## Kernel module handle
 disable_ro_nx
-
-## efi 相关
 
 ## is_kernel 的修正
 
