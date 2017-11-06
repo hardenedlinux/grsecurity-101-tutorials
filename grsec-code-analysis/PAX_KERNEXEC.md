@@ -635,26 +635,161 @@ pgd_t * __init efi_call_phys_prolog(void)
 相应的，我们可以在 efi_call_phys( /arch/x86/platform/efi/efi_stub_32.S)的实现中看到，PaX 会将运行时的一些寄存器切换到 __KERNEXEC_EFI_DS 段，关闭分页机制，使用物理地址直接访问调用 EFI 的 set_virtual_address_map 服务，开启虚拟地址模式，后续的 efi_enter_virtual_mode 将 EFI 的服务重映射到虚拟地址，基于分页机制设置 pte 性质，后续内核申请服务直接使用 efi_call_virt 来调用服务。
 
 ## Kernel module handle
-disable_ro_nx
-
-## is_kernel 的修正
-
-## 一些宏
-/arch/x86/include/asm/segment.h
+PAX_KERNEXEC 针对内核可加载模块的加固是非常重要的一部分，主要实现是将可加载模块的数据和模块代码的分离。首先我们看到：
 ```  
-#define __KERNEXEC_KERNEL_CS		(GDT_ENTRY_KERNEXEC_KERNEL_CS*8)
+/* 原先的内核并没有分开 rx/rw，整片内存一次性申请*/
+struct module_layout {
+	/* The actual code. */
+	void *base_rx;
+	/* The actual data. */
+	void *base_rw;
+	/* Code size. */
+	unsigned int size_rx;
+	/* Data size. */
+	unsigned int size_rw;
+
+#ifdef CONFIG_MODULES_TREE_LOOKUP
 	......
-#define GDT_ENTRY_KERNEXEC_KERNEL_CS	7
-	......
-```  
-/arch/x86/kernel/vmlinux.lds.S
-```  
-#include <asm/segment.h>
-
-#if defined(CONFIG_X86_32) && defined(CONFIG_PAX_KERNEXEC)
-#define __KERNEL_TEXT_OFFSET	(LOAD_OFFSET + ____LOAD_PHYSICAL_ADDR)
-#else
-#define __KERNEL_TEXT_OFFSET	0
 #endif
+};
 ```  
+内核可加载模块初始化的调用路径：
+init_module -> load_module -> layout_and_allocate -> move_module
+其中，move_module 承担的工作就是申请分配内存，并且最终将模块加载到相应的内存中去。
+```  
+static int move_module(struct module *mod, struct load_info *info)
+{
+	/* 申请的内存包括仅供初始化使用的代码和常驻内存的代码 */
+	int i;
+	void *ptr;
+
+	/* Do the allocs. */
+	/* 这个是经过 PaX 修改的，默认申请不可执行的内存（PAGE_KERNEL） */
+	ptr = module_alloc(mod->core_layout.size_rw);
+	/*
+	 * The pointer to this block is stored in the module structure
+	 * which is inside the block. Just mark it as not being a
+	 * leak.
+	 */
+	kmemleak_not_leak(ptr);
+	if (!ptr)
+		return -ENOMEM;
+
+	memset(ptr, 0, mod->core_layout.size_rw);
+	mod->core_layout.base_rw = ptr;
+
+	/* 此处专用于内核模块加载时的初始化所用，初始化后可以释放 */
+	if (mod->init_layout.size_rw) {
+		ptr = module_alloc(mod->init_layout.size_rw);
+		/*
+		 * The pointer to this block is stored in the module structure
+		 * which is inside the block. This block doesn't need to be
+		 * scanned as it contains data and code that will be freed
+		 * after the module is initialized.
+		 */
+		kmemleak_ignore(ptr);
+		if (!ptr) {
+			module_memfree(mod->core_layout.base_rw);
+			return -ENOMEM;
+		}
+		memset(ptr, 0, mod->init_layout.size_rw);
+		mod->init_layout.base_rw = ptr;
+	} else
+		mod->init_layout.base_rw = NULL;
+
+	/* 显式分配 PAGE_KERNEL_RX 的区域，这个函数的实现是原来内核的 module_alloc 实现 */
+	ptr = module_alloc_exec(mod->core_layout.size_rx);
+	kmemleak_not_leak(ptr);
+	if (!ptr) {
+		if (mod->init_layout.base_rw)
+			module_memfree(mod->init_layout.base_rw);
+		module_memfree(mod->core_layout.base_rw);
+		return -ENOMEM;
+	}
+
+	pax_open_kernel();
+	memset(ptr, 0, mod->core_layout.size_rx);
+	pax_close_kernel();
+	mod->core_layout.base_rx = ptr;
+
+	/* 用于初始化的代码段 */
+	if (mod->init_layout.size_rx) {
+		ptr = module_alloc_exec(mod->init_layout.size_rx);
+		kmemleak_ignore(ptr);
+		if (!ptr) {
+			module_memfree(mod->core_layout.base_rx);
+			if (mod->init_layout.base_rw)
+				module_memfree(mod->init_layout.base_rw);
+			module_memfree(mod->core_layout.base_rw);
+			return -ENOMEM;
+		}
+
+		pax_open_kernel();
+		memset(ptr, 0, mod->init_layout.size_rx);
+		pax_close_kernel();
+		mod->init_layout.base_rx = ptr;
+	} else
+		mod->init_layout.base_rx = NULL;
+
+	/* Transfer each section which specifies SHF_ALLOC */
+	pr_debug("final section addresses:\n");
+	/* 这里解析 ELF 格式的可加载模块 */
+	for (i = 0; i < info->hdr->e_shnum; i++) {
+		void *dest;
+		Elf_Shdr *shdr = &info->sechdrs[i];
+
+		if (!(shdr->sh_flags & SHF_ALLOC))
+			continue;
+
+		/* 这里根据解析的结果确定不同段的加载地址 */
+		if (shdr->sh_entsize & INIT_OFFSET_MASK) {
+			if ((shdr->sh_flags & SHF_WRITE) || !(shdr->sh_flags & SHF_ALLOC))
+				dest = mod->init_layout.base_rw
+					+ (shdr->sh_entsize & ~INIT_OFFSET_MASK);
+			else
+				dest = mod->init_layout.base_rx
+					+ (shdr->sh_entsize & ~INIT_OFFSET_MASK);
+		} else {
+			if ((shdr->sh_flags & SHF_WRITE) || !(shdr->sh_flags & SHF_ALLOC))
+				dest = mod->core_layout.base_rw + shdr->sh_entsize;
+			else
+				dest = mod->core_layout.base_rx + shdr->sh_entsize;
+		}
+
+		if (shdr->sh_type != SHT_NOBITS) {
+
+#ifdef CONFIG_PAX_KERNEXEC
+#ifdef CONFIG_X86_64
+			/* 因为后续要加载代码，此处可写可执行 */
+			if ((shdr->sh_flags & SHF_WRITE) && (shdr->sh_flags & SHF_EXECINSTR))
+				set_memory_x((unsigned long)dest, (shdr->sh_size + PAGE_SIZE) >> PAGE_SHIFT);
+#endif
+			/* 这是模块需要的只读数据段 */
+			if (!(shdr->sh_flags & SHF_WRITE) && (shdr->sh_flags & SHF_ALLOC)) {
+				/* 因为没有可写标志，复制需要关掉 wp 位 */
+				pax_open_kernel();
+				memcpy(dest, (void *)shdr->sh_addr, shdr->sh_size);
+				pax_close_kernel();
+			} else
+#endif
+			memcpy(dest, (void *)shdr->sh_addr, shdr->sh_size);
+		}
+		/* Update sh_addr to point to copy in image. */
+
+#ifdef CONFIG_PAX_KERNEXEC
+		/* 线性地址和虚拟地址的转换，只和 32-bit 有关 */
+		if (shdr->sh_flags & SHF_EXECINSTR)
+			shdr->sh_addr = ktva_ktla((unsigned long)dest);
+		else
+#endif
+
+			shdr->sh_addr = (unsigned long)dest;
+		pr_debug("\t0x%lx %s\n",
+			 (long)shdr->sh_addr, info->secstrings + shdr->sh_name);
+	}
+
+	return 0;
+}
+```  
+该函数最终调用 memcpy 将可加载模块的相应代码数据加载到内存中去。加载结束后若有CONFIG_DEBUG_KMEMLEAK，强制进行一遍权限的检查，防止 W^X。分离数据和代码除了内存属性的不同，也使得他们不再连续的内存区域。
 
