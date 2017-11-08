@@ -46,7 +46,7 @@ Hypervisor is what we called "Ring -1" world and it becomes a very important lay
 
 # NEVER Use VirtualBox
 
-Using VirtualBox is STRONGLY DISCOURAGED, you should switch to a KVM-based virtualization.
+Using VirtualBox is STRONGLY DISCOURAGED, you should switch to a Xen or KVM-based virtualization.
 
 VirtualBox depends on its kernel moudule to function properly, but the module failed to adopt state-of-art security measures. VirtualBox doesn't support KERNEXEC, UDEREF, RANDKSTACK, or SMAP, as spender once said.
 
@@ -58,12 +58,14 @@ VirtualBox depends on its kernel moudule to function properly, but the module fa
 
 # AVOID Xen If You Can
 
-Xen is one of the earliest technology for virtualization in Linux kernel, it has many undesirable designs in a security-oriented perspective. Instead of separating or isolating different components, it uses a monolithic and complicated architecture. Any bugs in Dom0 could easily lead to the compromise of the entire system.
+Xen is one of the earliest technology for virtualization for Linux kernel, it has many undesirable designs in a security-oriented perspective. Instead of separating or isolating different components, it uses a monolithic and complicated architecture. Any bugs in Dom0 could easily lead to the compromise of the entire system.
 
-Dozens of critical vulnerabilities are discovered from Xen, about one to three each year, allowing the Guest to subvert the Host entirely. 
-
-KVM is not fundamentally more secure than Xen, but has apparently somehow learned from mistakes of Xen, and comes with less vulnerabilities.
+Dozens of critical vulnerabilities are discovered from Xen, about one to three each year, allowing the Guest to subvert the Host entirely. KVM is not fundamentally more secure than Xen, but has apparently somehow comes with less vulnerabilities.
 
 See [this paper](https://www.internetsociety.org/sites/default/files/ndss2017_02A-4_Shi_paper.pdf).
-(TODO: more citations)
 
+Sometimes, it's still desirable to use Xen. KVM is a Type-II hypervisor, which is simply a module runs under the "big and fat" Linux kernel, while Xen is a true bare-metal Type-I hypervisor, contains nothing but the hypervisor itself. Although in practice Dom0 always uses Linux kernel, Xen still presents smaller attack surface as a hypervisor. 
+
+See [Qubes OS Architecture](https://www.qubes-os.org/attachment/wiki/QubesArchitecture/arch-spec-0.3.pdf), 3.2. Xen vs. KVM security architecture comparison, too see if Xen better suits your use case.
+
+(TODO: more citations)
