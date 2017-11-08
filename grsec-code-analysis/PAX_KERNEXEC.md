@@ -791,5 +791,5 @@ static int move_module(struct module *mod, struct load_info *info)
 	return 0;
 }
 ```  
-该函数最终调用 memcpy 将可加载模块的相应代码数据加载到内存中去。加载结束后若有CONFIG_DEBUG_KMEMLEAK，强制进行一遍权限的检查，防止 W^X。分离数据和代码除了内存属性的不同，也使得他们不再连续的内存区域。
+该函数最终调用 memcpy 将可加载模块的相应代码数据加载到内存中去。加载结束后若有CONFIG_DEBUG_KMEMLEAK，强制进行一遍权限的检查，防止 W&X。分离数据和代码除了内存属性的不同，也使得他们不再连续的内存区域。
 
