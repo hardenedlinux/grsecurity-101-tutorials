@@ -16,7 +16,7 @@ The 3rd "nuclear" bomb named ["The Stack Clash"](https://www.qualys.com/2017/06/
 
 PaX/Grsecurity also restricted SUID program's RLIMIT_STACK up to 8MB and the environment arg/strings up to 512KB.
 
-5) GNU cflow and GCC's -fstack-check can be considered in the situational hardening solution and the performance impact trade-off must be made.
+5) GNU cflow and GCC's -fstack-check can be considered in the situational hardening solution and the performance impact trade-off must be made. For example, Gentoo Hardened enabled -fstack-check since gcc-4.8 (around 2014?) and can mitigate most exploitations of Stack Clash.
 
 Spender/PaX team also pointing out the possibility of similar issues in kernel stack. [KSPP doesn't try](http://www.openwall.com/lists/kernel-hardening/2017/03/13/4) to [understand STACKLEAK](http://openwall.com/lists/kernel-hardening/2017/06/09/14) while trying to copy+paste stuff from PaX/Grsecurity. On the other hand, VMAP_STACK is [not solid as KSPP claimed](http://openwall.com/lists/kernel-hardening/2017/06/06/1). [Forge the mitigation by introducing more exploitable bugs](http://seclists.org/oss-sec/2017/q1/161) is not the proper way to do it. Instead, Grsecurity moved the thread_info off the kstack in the early days and then forged it with other [defensive code as a feature KSTACKOVERFLOW in 2014](https://hardenedlinux.github.io/system-security/2016/12/13/kernel_mitigation_checklist.html).
 
