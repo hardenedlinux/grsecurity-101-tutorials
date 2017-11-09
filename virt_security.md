@@ -66,6 +66,6 @@ See [this paper](https://www.internetsociety.org/sites/default/files/ndss2017_02
 
 Sometimes, it's still desirable to use Xen. KVM is a Type-II hypervisor, which is simply a module runs under the "big and fat" Linux kernel, while Xen is a true bare-metal Type-I hypervisor, contains nothing but the hypervisor itself. Although in practice Dom0 always uses Linux kernel, Xen still presents smaller attack surface as a hypervisor. 
 
-See [Qubes OS Architecture](https://www.qubes-os.org/attachment/wiki/QubesArchitecture/arch-spec-0.3.pdf), 3.2. Xen vs. KVM security architecture comparison, too see if Xen better suits your use case.
+See [Qubes OS Architecture](https://www.qubes-os.org/attachment/wiki/QubesArchitecture/arch-spec-0.3.pdf), 3.2. Xen vs. KVM security architecture comparison, to see if Xen better suits your use case.
 
 (TODO: more citations)
