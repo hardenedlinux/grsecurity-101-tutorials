@@ -65,6 +65,8 @@ use-after-free is a very popular bug class in kernel and it can be exploited by 
 
 * SL*B freelist randomization was submitted by Thomas Garnier. For more detail, plz read his [write-up](https://medium.com/@mxatone/randomizing-the-linux-kernel-heap-freelists-b899bb99c767#.oxwte8xb5). [SLAB freelist randomization](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c7ce4f60ac199fb3521c5fcd64da21cee801ec2b) merged in v4.7 and [SLUB freelist randomization](http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=210e7a43fa905bccafa9bb5966fba1d71f33eb8b) merged in v4.8.
 
+* PaX/Grsecurity added xor operations on slab pointers in 2016 and it's being ported to the vanilla kernel [merged in v4.14](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=2482ddec670fb83717d129012bc558777cb159f7).
+
 ## ret2usr protection
 I'm not sure how many incidents were getting involved with easy-to-write null-deref exploit. The truth is there were a lot. It ended by restrict minimal address of memory mapping, which is a trivial mitigation after Spender's Enlightment framework showed up in those endless crazy party;-) It was a crazy era fulfilled with ignorance and a shame to the defensive side, even not to mention the *backdoor* fix( "thanks" to the greatest GNU/Linux vendor..well, they wouldn't call themselves "GNU and slash and Linux" vendor, I suppose;-)) for the mitigation which supposed to protect your digital asset. KERNEXEC/UDEREF are the only options back in those 0ld horrible "one null-deref bug can root them all" days and remeber this: It's not very long ago. 
 
