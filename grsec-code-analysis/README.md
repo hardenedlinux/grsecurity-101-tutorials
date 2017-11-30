@@ -73,15 +73,16 @@ PAX_REDCOUNT 的实现非常简单,是在原子操作相关的 atomic_* 函数�
 #### 简介  
 PAX_KERNEXEC/PAX_UDEREF 是 PaX 率先实现的,针对 ret2usr 这类漏洞利用的防御的特性。这组防护特性有效的防止内核执行流重定向到位于用户空间的内存。在 PaX 实现多年以后,受到启发的硬件厂商也提供了相应的硬件支持来防御 ret2usr,但是 PAX_KERNEXEC/PAX_UDEREF 依然是最为强悍的实现。
 #### 设计实现
-1. [PAX_KERNEXEC](PAX_KERNEXEC.md) 内核版的 PAGEEXEC/MPROTECT
-2. PAX_UDEREF
+1. [PAX_KERNEXEC](PAX_KERNEXEC.md) 内核版的 PAGEEXEC/MPROTECT，针对内核内存的性质做限制，偏重代码
+2. [PAX_MEMORY_UDEREF](PAX_MEMORY_UDEREF.md) 分离内核/用户空间，防止内核/用户空间越界操作，偏中数据
 3. smep/smap 是 x86_64 上的硬件支持
 4. [PXN](PXN.md)/PAN 是 ARM v7 以后的硬件支持
+附：[recent_arm_security_improvements](https://grsecurity.net/recent_arm_security_improvements.php)这是 Grsecurity 针对 KERNEXEC/UDEREF 的一篇介绍，也有非常详细的是实现介绍。
 
 ### 关于内存信息泄漏的问题
-#### 简介
+#### 简介  
 内核的内存泄漏对安全来说是一个巨大的威胁。敏感信息的泄漏,可以协助 bypass 各种安全特性,造成很大威胁。关于内存信息泄漏的问题主要是内存泄漏和敏感信息资源的访问,前者发生在内存拷贝向用户空间过多,当内存含有敏感信息时造成 infoleak,后者则是和具体漏洞有关,相对比较零散,加固方式也比较多样。
-#### 设计实现
+#### 设计实现  
 1. [MEMORY_LEAK](MEMORY_LEAK.md) 这个文档介绍了 PAX_MEMORY_SANITIZE 和 PAX_MEMORY_STACKLEAK, 前者针对已释放内存的擦除,后者则是栈上残留信息的擦除。
 2. infoleak 相关信息汇集。
 
