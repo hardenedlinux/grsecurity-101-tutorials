@@ -118,7 +118,7 @@ static void pax_switch_mm(struct mm_struct *next, unsigned int cpu)
                 /* 将新的进程 pgd 复制进内核 pgd */
 		__clone_user_pgds(get_cpu_pgd(cpu, kernel), next->pgd);
 
-	/* 将新进程用户态的 pgd 备份(注意加上了 USER_PGD_PTRS)，并且撤销了可执行 */
+	/* 将新进程用户态的 pgd 备份(加上了 USER_PGD_PTRS？)，并且撤销了可执行 */
 	__shadow_user_pgds(get_cpu_pgd(cpu, kernel) + USER_PGD_PTRS, next->pgd);
 
 	pax_close_kernel();
@@ -174,29 +174,37 @@ void __shadow_user_pgds(pgd_t *dst, const pgd_t *src)
 由于 per_cpu_pgd 和内核/用户空间分隔和 PCID 的引入，内核许多地方需要做配合性的修改，比如一些刷新 TLB 的地方，我们不再一一进行代码分析，只选取有代表性的部分。	
 
 ## 系统调用陷入 kernel 前的检查
+下面这段代码在 pax_enter_kernel 中，在系统调用陷入内核前会被调用
 ```  
 #ifdef CONFIG_PAX_MEMORY_UDEREF
+	/* 根据处理器是否具有 PCID 的特性选择指令 */
 	ALTERNATIVE "jmp 111f", "", X86_FEATURE_PCID
 	/* 读取 CR3 寄存器，检查切换方向 */
 	GET_CR3_INTO_RDI
-	/* 参见 PCID，若非零则为用户空间，跳转到 112 */
+	/* 参见 PCID，若非零(dil为低位)则为用户空间，跳转到 112 */
 	cmp	$0,%dil
 	jnz	112f
+	/* 为零，设置内核数据段 */
 	mov	$__KERNEL_DS,%edi
 	mov	%edi,%ss
 	jmp	111f
 	/* 检查是否来自用户空间 */
 112:	cmp	$1,%dil
+        /* 若低位被置位则说明来自用户空间 */
 	jz	113f
+	/* 否则出错 */
 	ud2
 113:	sub	$4097,%rdi
+	/* 置高位，参见 KERNEXEC_BTS */
 	bts	$63,%rdi
+	/* 写入 CR3 */
 	SET_RDI_INTO_CR3
 	mov	$__UDEREF_KERNEL_DS,%edi
 	mov	%edi,%ss
 111:
 #endif
 ```  
+相应的在 pax_exit_kernel 中会有一个逆过程。
 
 ## user_shadow_base
 ```  
