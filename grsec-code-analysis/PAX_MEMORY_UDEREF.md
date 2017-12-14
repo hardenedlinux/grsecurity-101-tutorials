@@ -1,7 +1,8 @@
 # PAX_MEMORY_UDEREF
 
 ## 简述
-PAX_MEMORY_UDEREF 是针对 linux 的内核/用户空间分离的重要特性，连同 KERNEXEC 构成了强悍的地址空间划分隔离，防御了大量针对内核的漏洞利用，比如 ret2user/ret2dir 这类将特权级执行流引向用户空间的攻击方式，即便是陆续被硬件实现的 smep/smap 或者 pxn/pan 亦难与 UDEREF 比肩。在 32-bit 的 x86 下，分离的特性很大部分是透过分段机制的寄存器去实现的，而 amd64 以后由于段寄存器功能的削弱，PaX 针对 64-bit 精心设计了 KERNEXEC/UDEREF，包括使用 PCID 特性和 per-cpu-pgd 的实现等。  
+PAX_MEMORY_UDEREF 是针对 Linux 的内核/用户空间分离的重要特性，连同 KERNEXEC 构成了强悍的地址空间划分隔离，防御了大量针对内核的漏洞利用，比如 ret2usr/ret2dir 这类将特权级执行流引向用户空间的攻击方式，即便是陆续被硬件实现的 SMEP/SMAP( x86) 或者 PXN/PAN( ARMv7/ARMv8.1) 亦难与 UDEREF 比肩。在 32-bit 的 x86 下，分离的特性很大部分是透过分段机制的寄存器去实现的，而 amd64 以后由于段寄存器功能的削弱，PaX 针对 64-bit 精心设计了 KERNEXEC/UDEREF，包括使用 PCID 特性和 per-cpu-pgd 的实现等。UDEREF诞生于ret2usr攻击已经在地下大规模使用的年代，虽然2004年PaX/Grsecurity公布了i386版本的KERNEXEC，但并未对数据访问严格限制，所以在一定程度上也方便了ret2usr和任意写的漏洞利用，随后PaX/Grsecurity为了弥补这一风险于2007年公布了i386版本的UDEREF，之后又实现了x64以及armv7的UDEREF，在众多UDEREF实现中安全性和性能最好的是[i386](https://grsecurity.net/~spender/uderef.txt)和[armv7](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67decb18f1c9751e8b3c3de3d551075)，在x64的进化之路则显得更坎坷，2010年x64的版本很弱，且无法防御多层deref后的情况，之后在2013年的实现中被称为强实现的版本极大的增强防护的同时也利用Sandybridge+开始后的硬件特性PCID提升性能，后续UDEREF的改进(2017版)主要是利用硬件特性SMAP提升了性能的同时保证安全性，这篇分析是基于2013版的实现进行的。
+
 UDEREF的实现主要包括几个方面：  
 * per-cpu-pgd 的实现，将内核/用户空间的页目录彻底分离，彼此无法跨界访问
 * PCID 特性的使用，跨界访问的时候产生硬件检查
@@ -61,7 +62,7 @@ PCID 是一个 X86_64 处理器支持的特性，由 CR4.PCIDE 控制使能，�
 #define PCID_USER		1UL
 #define PCID_NOFLUSH		(1UL << 63)
 ```  
-这是 PaX 实现的标志位，可以看到 Pax 只是分离了内核和用户空间。最后一个标志不再 0-11bit 之中表示不刷新。这些相关的置位可以在 [Intel 的手册里找到](https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf)(UDEREF 所用到的另一个硬件支持 INVPCID 也可以参考手册)。  
+这是 PaX 实现的标志位，可以看到 PaX 只是分离了内核和用户空间。最后一个标志不再 0-11bit 之中表示不刷新。这些相关的置位可以在 [Intel 的手册里找到](https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf)(UDEREF 所用到的另一个硬件支持 INVPCID 也可以参考手册)。  
 一个典型的例子，PaX 在 /arch/x86/mm/uderef.c 里实现了这样一对函数：
 ```  
 void __used __pax_open_userland(void)
@@ -96,7 +97,7 @@ void __used __pax_close_userland(void)
 }
 EXPORT_SYMBOL(__pax_close_userland);
 ```  
-这两个函数用在提供给内核访问用户空间的内存 __uaccess_begin/end 这组函数用，在原来内核的实现中是直接关掉 SMEP 的保护。这里 PaX 的实现则非常有效的检查了切换的方向，并且借用 PCID 的特性控制访问的空间，而不是简单的关掉 SMEP。CVE-2017-5123 这个漏洞利用中，针对内核空间的任意写是无法达成的，因为内核空间和用户空间使用被 PCID 所限制，并且 pgd 是隔离的，切换前后是相互独立的空间。而原内核的实现则可以实现整个内核空间的任意写入。
+这两个函数用在提供给内核访问用户空间的内存 __uaccess_begin/end 这组函数用，在原来内核的实现中是直接关掉 SMEP 的保护。这里 PaX 的实现则非常有效的检查了切换的方向，并且借用 PCID 的特性控制访问的空间，而不是简单的关掉 SMEP。类似[CVE-2014-9322( "BadIRET")](https://hardenedlinux.github.io/system-security/2015/07/05/badiret-exp.html)和[CVE-2017-5123](https://salls.github.io/Linux-Kernel-CVE-2017-5123/)都无法打穿UDEREF， 在CVE-2017-5123的漏洞利用中，针对内核空间的任意写是无法达成的，因为内核空间和用户空间使用被 PCID 所限制，并且 pgd 是隔离的，切换前后是相互独立的空间。而原内核的实现则可以实现整个内核空间的任意写入。
 
 
 ## pax_switch_mm 的处理
