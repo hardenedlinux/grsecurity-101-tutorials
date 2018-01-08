@@ -1,12 +1,17 @@
-# PAX_MEMORY_UDEREF
+# PAX_MEMORY_UDEREF  
 
-## 简述
+## 简述  
 PAX_MEMORY_UDEREF 是针对 Linux 的内核/用户空间分离的重要特性，连同 KERNEXEC 构成了强悍的地址空间划分隔离，防御了大量针对内核的漏洞利用，比如 ret2usr/ret2dir 这类将特权级执行流引向用户空间的攻击方式，即便是陆续被硬件实现的 SMEP/SMAP( x86) 或者 PXN/PAN( ARMv7/ARMv8.1) 亦难与 UDEREF 比肩。在 32-bit 的 x86 下，分离的特性很大部分是透过分段机制的寄存器去实现的，而 amd64 以后由于段寄存器功能的削弱，PaX 针对 64-bit 精心设计了 KERNEXEC/UDEREF，包括使用 PCID 特性和 per-cpu-pgd 的实现等。UDEREF诞生于ret2usr攻击已经在地下大规模使用的年代，虽然2004年PaX/Grsecurity公布了i386版本的KERNEXEC，但并未对数据访问严格限制，所以在一定程度上也方便了ret2usr和任意写的漏洞利用，随后PaX/Grsecurity为了弥补这一风险于2007年公布了i386版本的UDEREF，之后又实现了x64以及armv7的UDEREF，在众多UDEREF实现中安全性和性能最好的是[i386](https://grsecurity.net/~spender/uderef.txt)和[armv7](https://forums.grsecurity.net/viewtopic.php?f=7&t=3292&sid=d67decb18f1c9751e8b3c3de3d551075)，在x64的进化之路则显得更坎坷，2010年x64的版本很弱，且无法防御多层deref后的情况，之后在2013年的实现中被称为强实现的版本极大的增强防护的同时也利用Sandybridge+开始后的硬件特性PCID提升性能，后续UDEREF的改进(2017版)主要是利用硬件特性SMAP提升了性能的同时保证安全性，这篇分析是基于2013版的实现进行的。
 
 UDEREF的实现主要包括几个方面：  
 * per-cpu-pgd 的实现，将内核/用户空间的页目录彻底分离，彼此无法跨界访问
 * PCID 特性的使用，跨界访问的时候产生硬件检查
-* 内核/用户空间切换时，将用户空间映射为不可执行以及一些刷新 TLB 配合实现
+* 内核/用户空间切换时，将用户空间映射为不可执行以及一些刷新 TLB 配合实现    
+
+由于 UDEREF 经过漫长的演变，而且不同的硬件设施会产生不同的防御效果和安全性能，因此 PaX 实现了如下几种模式的 UDEREF：  
+* 无硬件 PCID 支持的，维护的页目录数量只有一个，进出内核的时候屏蔽页目录项的相关访问权限
+* 有硬件 PCID 支持的 WEAKUDEREF，维护两个页目录，并且将用户空间也备份进内核页目录，屏蔽相关访问位，进出内核时切换 CR3
+* 有硬件 PCID 支持的 STRONGUDEREF，维护两个页目录，不备份用户空间，内核空间的 TLB 常驻不刷新，减少性能损耗 
 
 ## per_cpu_pgd 的实现
 UDEREF 一个非常重要的子特性就是 PaX 重新为用户空间和内核空间维护了一个页目录( pgd)。  
@@ -62,8 +67,40 @@ PCID 是一个 X86_64 处理器支持的特性，由 CR4.PCIDE 控制使能，�
 #define PCID_USER		1UL
 #define PCID_NOFLUSH		(1UL << 63)
 ```  
-这是 PaX 实现的标志位，可以看到 PaX 只是分离了内核和用户空间。最后一个标志不再 0-11bit 之中表示不刷新。这些相关的置位可以在 [Intel 的手册里找到](https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf)(UDEREF 所用到的另一个硬件支持 INVPCID 也可以参考手册)。  
-一个典型的例子，PaX 在 /arch/x86/mm/uderef.c 里实现了这样一对函数：
+这是 PaX 实现的标志位，可以看到 PaX 只是分离了内核和用户空间。最后一个标志不在 0-11bit 之中，表示当 cr3 被重载时不刷新 TLB，默认是会刷新的，籍此可减少刷新频率减少性能损失。这些相关的置位可以在 [Intel 的手册里找到](https://software.intel.com/sites/default/files/managed/a4/60/325384-sdm-vol-3abcd.pdf)(UDEREF 所用到的另一个硬件支持 INVPCID 也可以参考手册)。  
+一个典型的例子，PaX 在 arch/x86/include/smap.h 和 arch/x86/mm/uderef.c 里实现了这样一对函数：
+```  
+extern void __pax_open_userland(void);
+static __always_inline unsigned long pax_open_userland(void)
+{
+        /* 这里的汇编会视配置选项而定
+         * 如果是 STRONGUDEREF 直接调用 __pax_open_userland 
+         * WEAKUDEREF 则不需要切换，因为内核留有 shadow，只是屏蔽了一些访问权限
+         */
+#if defined(CONFIG_X86_64) && defined(CONFIG_PAX_MEMORY_UDEREF)
+	asm volatile(ALTERNATIVE("", PAX_DIRECT_CALL("%P[open]"), X86_FEATURE_STRONGUDEREF)
+		:
+		: [open] "i" (__pax_open_userland)
+		: "memory", "rax");
+#endif
+
+	return 0;
+}
+
+extern void __pax_close_userland(void);
+static __always_inline unsigned long pax_close_userland(void)
+{
+
+#if defined(CONFIG_X86_64) && defined(CONFIG_PAX_MEMORY_UDEREF)
+	asm volatile(ALTERNATIVE("", PAX_DIRECT_CALL("%P[close]"), X86_FEATURE_STRONGUDEREF)
+		:
+		: [close] "i" (__pax_close_userland)
+		: "memory", "rax");
+#endif
+
+	return 0;
+}
+```  
 ```  
 void __used __pax_open_userland(void)
 {
@@ -111,6 +148,7 @@ static void pax_switch_mm(struct mm_struct *next, unsigned int cpu)
 #ifdef CONFIG_PAX_PER_CPU_PGD
 	pax_open_kernel();
 
+	/* 若无 pcid，只会用到一个页目录 */
 #if defined(CONFIG_X86_64) && defined(CONFIG_PAX_MEMORY_UDEREF)
 	if (static_cpu_has(X86_FEATURE_PCIDUDEREF))
 		__clone_user_pgds(get_cpu_pgd(cpu, user), next->pgd);
@@ -119,16 +157,18 @@ static void pax_switch_mm(struct mm_struct *next, unsigned int cpu)
                 /* 将新的进程 pgd 复制进内核 pgd */
 		__clone_user_pgds(get_cpu_pgd(cpu, kernel), next->pgd);
 
-	/* 将新进程用户态的 pgd 备份(加上了 USER_PGD_PTRS？)，并且撤销了可执行 */
+	/* 这里将用户空间的 pgd 备份进内核，并且撤销了可执行 */
 	__shadow_user_pgds(get_cpu_pgd(cpu, kernel) + USER_PGD_PTRS, next->pgd);
 
 	pax_close_kernel();
 
-	/* 检查 pgd 的备份是否有 PCID 位的错误 */
+	/* 检查是否有 PCID 位的错误 */
 	BUG_ON((__pa(get_cpu_pgd(cpu, kernel)) | PCID_KERNEL) != (read_cr3() & __PHYSICAL_MASK) && (__pa(get_cpu_pgd(cpu, user)) | PCID_USER) != (read_cr3() & __PHYSICAL_MASK));
 
 #if defined(CONFIG_X86_64) && defined(CONFIG_PAX_MEMORY_UDEREF)
-	/* 清除大量的映射缓存造成的性能损耗比较大，必须有 INVPCID 的硬件支持 */
+	/* 清除大量的映射缓存造成的性能损耗比较大，必须有 INVPCID 的硬件支持 
+         * 这里只是刷新的手段不同，目的是一样的  
+         */
 	if (static_cpu_has(X86_FEATURE_PCIDUDEREF)) {
 		if (static_cpu_has(X86_FEATURE_INVPCID)) {
 			/* 清除所有带有 PCID_USER 映射缓存 */
@@ -137,18 +177,18 @@ static void pax_switch_mm(struct mm_struct *next, unsigned int cpu)
 				/* 清除所有带有 PCID_KERNEL 映射缓存 */
 				invpcid_flush_single_context(PCID_KERNEL);
 		} else {
-                        /* 分别加载 pgd 到 cr3，注意 PCID_* 的置位 */
+                        /* 分别加载 pgd 到 cr3，注意 PCID_* 的置位，能够导致映射缓存刷新 */
 			write_cr3(__pa(get_cpu_pgd(cpu, user)) | PCID_USER);
+                        /* NOFLUSH 是为了提高性能，减少刷新，因为内核/用户的pgd已经彻底分离，内核常驻无需刷新 */
 			if (static_cpu_has(X86_FEATURE_STRONGUDEREF))
 				write_cr3(__pa(get_cpu_pgd(cpu, kernel)) | PCID_KERNEL | PCID_NOFLUSH);
 			else
+                        /* weakuderef 仍在内核的 pgd 中留有 shadow 备份，需刷新 */
 				write_cr3(__pa(get_cpu_pgd(cpu, kernel)) | PCID_KERNEL);
 		}
 	} else
 #endif
-		/* 读取 pgd 到 cr3,注意这里是在内核空间
-                 * 这里只是原来 kernel 正常逻辑
-                 */
+		/* 读取 pgd 到 cr3,这里只是原来 kernel 正常逻辑 */
 		load_cr3(get_cpu_pgd(cpu, kernel));
 #endif
 
@@ -161,6 +201,7 @@ void __shadow_user_pgds(pgd_t *dst, const pgd_t *src)
 {
 	unsigned int count = USER_PGD_PTRS;
 
+        /* 只有 weakuderef 才有 shadow */
 	if (!pax_user_shadow_base)
 		return;
         /* 这里注意备份的时候标志位的掩码 */
@@ -169,45 +210,149 @@ void __shadow_user_pgds(pgd_t *dst, const pgd_t *src)
 }
 #endif
 ```  
+这里可以看到，stronguderef 彻底分离了 pgd，只有 weakuderef 才留有用户空间的备份
+```  
+/* 这是加载内核时的初始化 */
+static int __init setup_pax_weakuderef(char *str)
+{
+	if (uderef_enabled)
+		pax_user_shadow_base = 1UL << TASK_SIZE_MAX_SHIFT;
+	return 1;
+}
+__setup("pax_weakuderef", setup_pax_weakuderef);
+```  
 这里 pax_switch_mm 的修改主要涉及两个方面：  
-1. 由于 per_cpu_pgd 引入进行的配合实现进程切换(clone_user_pgd)
-2. 切换过程中 pgd 的处理(shadow_user_pgds、invpcid_flush_single_context)
-由于 per_cpu_pgd 和内核/用户空间分隔和 PCID 的引入，内核许多地方需要做配合性的修改，比如一些刷新 TLB 的地方，我们不再一一进行代码分析，只选取有代表性的部分。	
+1. 由于 per_cpu_pgd 引入进行的配合实现进程切换 pgd( clone_user_pgd)。
+2. 为了完成隔离和内核访问用户空间的需求，用户空间 pgd 的备份，TLB 的刷新( shadow_user_pgds、invpcid_flush_single_context、write_cr3)
+由于 per_cpu_pgd 和内核/用户空间分隔和 PCID 以及 shadow 备份的引入，内核许多地方需要做配合性的修改，比如一些刷新 TLB 的地方，我们不再一一进行代码分析，只选取有代表性的部分。  
 
 ## 系统调用陷入 kernel 前的检查
-下面这段代码在 pax_enter_kernel 中，在系统调用陷入内核前会被调用
+下面这段代码在 pax_enter_kernel_user 中，在系统调用陷入内核时( entry_SYSCALL_64)会被调用
 ```  
 #ifdef CONFIG_PAX_MEMORY_UDEREF
-	/* 根据处理器是否具有 PCID 的特性选择指令 */
+ENTRY(pax_enter_kernel_user)
+GLOBAL(patch_pax_enter_kernel_user)
+	pushq	%rdi
+	pushq	%rbx
+
+#ifdef CONFIG_PARAVIRT
+	PV_SAVE_REGS(CLBR_RDI)
+#endif
+        /* 视乎处理器特性选择指令 */
 	ALTERNATIVE "jmp 111f", "", X86_FEATURE_PCID
-	/* 读取 CR3 寄存器，检查切换方向 */
 	GET_CR3_INTO_RDI
-	/* 参见 PCID，若非零(dil为低位)则为用户空间，跳转到 112 */
-	cmp	$0,%dil
-	jnz	112f
-	/* 为零，设置内核数据段 */
-	mov	$__KERNEL_DS,%edi
-	mov	%edi,%ss
-	jmp	111f
-	/* 检查是否来自用户空间 */
-112:	cmp	$1,%dil
-        /* 若低位被置位则说明来自用户空间 */
-	jz	113f
-	/* 否则出错 */
-	ud2
-113:	sub	$4097,%rdi
-	/* 置高位，参见 KERNEXEC_BTS */
+	/* 检查 CR3 中关于 PCID 的置位，若未置位，是内核空间，直接结束 CR3 的切换 */
+	cmp	$1,%dil
+	jnz	4f
+	/* 将页目录切到 kernel 态的，并且带PCID_KERNEL */
+	sub	$4097,%rdi
+	/* 尝试置位高地址，使得内核的 TLB 不会被强刷 */
 	bts	$63,%rdi
-	/* 写入 CR3 */
+	/* 写入 CR3 不会导致 TLB的强制刷新 */
 	SET_RDI_INTO_CR3
-	mov	$__UDEREF_KERNEL_DS,%edi
-	mov	%edi,%ss
-111:
+	/* 在有 PCID 的处理器实际处理到此为止 */
+	jmp	3f
+111：
+
+	/* 取得 pgd 的虚拟地址，cr3 保存的是物理地址 */
+	GET_CR3_INTO_RDI
+	mov	%rdi,%rbx
+	add	$__START_KERNEL_map,%rbx
+	sub	phys_base(%rip),%rbx
+
+#ifdef CONFIG_PARAVIRT
+	......
+#else
+	/* 循环将用户空间的页表项某些标志位清除，防止内核的非法访问
+         * 参见内核 pgd 的标志位，USER_PGD_PTRS 为用户空间页目录个数 
+         */
+	i = 0
+	.rept USER_PGD_PTRS
+	movb	$0,i*8(%rbx)
+	i = i + 1
+	.endr
+#endif
+	/* 写入CR3，会发生 TLB 的刷新 */
+	SET_RDI_INTO_CR3
+
+#ifdef CONFIG_PAX_KERNEXEC
+	GET_CR0_INTO_RDI
+	bts	$X86_CR0_WP_BIT,%rdi
+	SET_RDI_INTO_CR0
+#endif
+
+3:
+
+#ifdef CONFIG_PARAVIRT
+	PV_RESTORE_REGS(CLBR_RDI)
+#endif
+
+	popq	%rbx
+	popq	%rdi
+	pax_ret pax_enter_kernel_user
+4:	ud2
+ENDPROC(pax_enter_kernel_user)
+```  
+相应的在 pax_exit_kernel_user 中会有一个逆过程,会将 pgd 项的标志位( _PAGE_BIT_*)恢复访问权限，但是不再强制刷新 TLB，因为不需要剔除任何缓存。
+```  
+ENTRY(pax_exit_kernel_user)
+GLOBAL(patch_pax_exit_kernel_user)
+	pushq	%rdi
+	pushq	%rbx
+
+#ifdef CONFIG_PARAVIRT
+	......
+#endif
+
+        /* 这是上述的逆过程 */
+	GET_CR3_INTO_RDI
+	ALTERNATIVE "jmp 1f", "", X86_FEATURE_PCID
+	cmp	$0,%dil
+	jnz	3f
+	add	$4097,%rdi
+	bts	$63,%rdi
+	SET_RDI_INTO_CR3
+	jmp	2f
+1:
+
+	mov	%rdi,%rbx
+
+#ifdef CONFIG_PAX_KERNEXEC
+	GET_CR0_INTO_RDI
+	btr	$X86_CR0_WP_BIT,%rdi
+	jnc	3f
+	SET_RDI_INTO_CR0
+#endif
+
+	add	$__START_KERNEL_map,%rbx
+	sub	phys_base(%rip),%rbx
+
+#ifdef CONFIG_PARAVIRT
+        ......
+#else
+        /* 这里恢复用户空间的页表项，注意这里为了性能，没有再刷新 TLB */
+	i = 0
+	.rept USER_PGD_PTRS
+	movb	$0x67,i*8(%rbx)
+	i = i + 1
+	.endr
+#endif
+
+2:
+
+#ifdef CONFIG_PARAVIRT
+	......
+#endif
+
+	popq	%rbx
+	popq	%rdi
+	pax_ret pax_exit_kernel_user
+3:	ud2
+ENDPROC(pax_exit_kernel_user)
 #endif
 ```  
-相应的在 pax_exit_kernel 中会有一个逆过程。
-
 ## user_shadow_base
+WEAKUDEREF 在内核中留下了用户空间的 shadow，但是屏蔽了可执行等标志，使得内核只能有限的访问他
 ```  
 static int __init setup_pax_weakuderef(char *str)
 {
@@ -216,7 +361,7 @@ static int __init setup_pax_weakuderef(char *str)
 	return 1;
 }
 ```  
-因为 PER_CPU_PGD 的引入，为了降低损耗，PaX 缩减了进程地址空间
+因为 PER_CPU_PGD 的引入，为了降低损耗能够实现 pgd 的备份，PaX 缩减了进程地址空间
 ```  
 config TASK_SIZE_MAX_SHIFT
 	int
@@ -224,6 +369,7 @@ config TASK_SIZE_MAX_SHIFT
 	default 47 if !PAX_PER_CPU_PGD
 	default 42 if PAX_PER_CPU_PGD
 ```  
+缩减的结果是将用户空间的 pgd 项减少到 8 个，ASLR 的随机位也都会缩减。
 
 ## __do_page_fault 的处理
 ```  
