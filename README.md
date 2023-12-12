@@ -2,9 +2,9 @@
 
 Grsecurity 是一套增强 Linux 内核安全的内核补丁集，能够轻松应对各种严重安全威胁。
 
-Grsecurity 使用的技术手段包括智能访问控制、通过防御内存破坏 (Memory corruption) 进行的 Exploit 防护及其他加固措施。
+Grsecurity 通过智能访问控制、并预防基于内存损坏（ memory corruption-based）漏洞利用，同时提供各种通常不需要额外配置的系统加固项，从而应对各种各样的安全威胁，实现对 Linux 内核的安全增强。
 
-它已经被活跃开发并维护了 15 年，并由 Open Source Security, Inc 提供商业支持。
+在过去的 22 年里，Grsecurity 得到了积极的开发和维护。并由Open Source Security, Inc. 提供商业支持。
 
 ## 目录
 
