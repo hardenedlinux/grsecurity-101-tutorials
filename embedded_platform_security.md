@@ -30,6 +30,8 @@ Pwned SoC kernel (ThreadX or other RTOSes)--> infoleak via DMA (identify kernsym
 * [Mercedes-Benz MBUX Security Research Report - 202105](https://keenlab.tencent.com/en/whitepapers/Mercedes_Benz_Security_Research_Report_Final.pdf)
 * | **Likely Wi-Fi firmware to Linux kernel privilege escalation**| [T-BONE: Drone vs. Tesla - 202104](https://web.archive.org/web/20230129133144/https://kunnamon.io/tbone/)
 * [Jailbreaking an Electric Vehicle in 2023 or What It Means to Hotwire Tesla's x86-Based Seat Heater - 202308](https://i.blackhat.com/BH-US-23/Presentations/US-23-Werling-Jailbreaking-Teslas.pdf), tools [PSPReverse](https://github.com/PSPReverse) on Github.
+* [Unlocking the Drive Exploiting Tesla Model 3 - 202311](https://www.synacktiv.com/sites/default/files/2023-11/tesla_grehack.pdf)
+* [0-click RCE on Tesla Model 3 through TPMS Sensors - 202411](https://www.synacktiv.com/sites/default/files/2024-10/hexacon_0_click_rce_on_tesla_model_3_through_tpms_sensors_light.pdf)
 
 ## Hardening the weak spots
 
