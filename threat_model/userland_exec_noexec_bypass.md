@@ -104,6 +104,18 @@ int main(int argc, char *argv[], char *envp[]) {
      syscall(SYS_exit, EXIT_FAILURE);
 }
 ```
+## Mitigation
+PaX/GRsecurity is the only solution against this bypass technique. The vanilla Linux kernel may have the solution in the future.
+
+| Exploit method | Mitigation |
+|:-------------:|:-----------------------:|
+| Overwrite /proc/*/mem | PaX/GRsecurity enabled /proc/*/mem restriction since the beginning (2012?) |
+| memfd_* execution | 1) PaX/GRsecurity RBAC (doesn't require any policy) treat it as SHM_EXEC 2) PaX/GRsecurity TPE |
+
+Prevention log:
+```
+Oct 31 15:50:37 newdevel kernel: [272707.761418] grsec: denied untrusted exec (due to not being in trusted group and file in non-root-owned directory) of / by /[perl:9099] uid/euid:1000/1000 gid/egid:1000/1000, parent /bin/bash[bash:9075] uid/euid:1000/1000 gid/egid:1000/1000
+```
 
 ## Reference
 * Bypassing noexec and executing arbitrary binaries https://iq.thc.org/bypassing-noexec-and-executing-arbitrary-binaries
