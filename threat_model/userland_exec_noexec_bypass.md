@@ -116,6 +116,47 @@ Prevention log:
 ```
 Oct 31 15:50:37 newdevel kernel: [272707.761418] grsec: denied untrusted exec (due to not being in trusted group and file in non-root-owned directory) of / by /[perl:9099] uid/euid:1000/1000 gid/egid:1000/1000, parent /bin/bash[bash:9075] uid/euid:1000/1000 gid/egid:1000/1000
 ```
+## Extra bonus from the legacy of 0ldsk00l hackers
+Let's say THC's approach as suitable for binary/backdoor execution. There's another [intriguing method](https://web.archive.org/web/20100720104659/http://dp.grhack.net/2009/09/17/python-in-noexec-land/) for bypassing the noexec restriction that primarily benefits exploit writers (s0rry, pentesters! This is not for you). GRHack introduced a technique to circumvent noexec by leveraging a feature in Python called Foreign Function Interface (FFI). This feature enables Python developers to directly invoke any C function from a shared object. You can bypass the noexec limitation by porting the exploit to Python. It's important to note that this approach specifically affects GNU/Linux systems, as [OpenBSD does not allow the loading of shared objects in noexec partitions](https://github.com/huku-/research/wiki/Sandboxing-and-isolation#212-mount-options). The PoC (run-ls.py) is simple as:
+
+```
+import ctypes
+
+libc = ctypes.CDLL('libc.so.6')
+
+system = libc.system
+system.argtypes = [ctypes.c_char_p]
+system.restype = ctypes.c_int
+
+command = b"ls -l"
+result = system(command)
+
+print("Return code:", result)
+```
+
+Test the PoC in noexec partition:
+```
+ved@debian-vtest:/mnt/ro-part/memexec$ python3 run-ls.py 
+total 208
+-rwxr-xr-x 1 ved ved   5416 Oct 31 12:42 a.out
+-rw-r--r-- 1 ved ved  43808 Oct 31 12:45 id
+-rwxr-xr-x 1 ved ved 138856 Oct 28 19:36 ls
+-rw-r--r-- 1 ved ved   3611 Oct 28 19:33 memexec-bash-arg-env.nasm
+-rw-r--r-- 1 ved ved   1216 Oct 31 12:42 memexec-bash-arg-env.o
+-rw-r--r-- 1 ved ved   1744 Oct 28 19:33 memexec-bash.nasm
+-rw-r--r-- 1 ved ved    544 Oct 28 19:33 memexec-bash.sh
+-rw-r--r-- 1 ved ved   1481 Oct 28 19:33 memexec.nasm
+-rw-r--r-- 1 ved ved    736 Oct 28 19:39 memexec.o
+-rw-r--r-- 1 ved ved    192 Oct 28 19:33 memexec-perl.sh
+-rw-r--r-- 1 ved ved   1671 Oct 28 19:33 memexec.php
+-rw-r--r-- 1 ved ved   1696 Oct 28 19:44 memexec-shell.c
+-rw-r--r-- 1 ved ved   3963 Oct 28 19:33 README.md
+-rw-r--r-- 1 ved ved    211 Nov  3 23:07 run-ls.py
+-rw-r--r-- 1 ved ved    340 Oct 30 17:20 shellcode_base64.txt
+-rw-r--r-- 1 ved ved    736 Oct 30 16:43 test.o
+-rw-r--r-- 1 ved ved   1442 Oct 30 16:43 test.s
+Return code: 0
+```
 
 ## Reference
 * Bypassing noexec and executing arbitrary binaries https://iq.thc.org/bypassing-noexec-and-executing-arbitrary-binaries
@@ -123,3 +164,4 @@ Oct 31 15:50:37 newdevel kernel: [272707.761418] grsec: denied untrusted exec (d
 * Execute ELF files without dropping them on disk https://github.com/nnsee/fileless-elf-exec
 * userland exec for Linux x86_64 https://github.com/bediger4000/userlandexec
 * The Design and Implementation of Userland Exec https://grugq.github.io/docs/ul_exec.txt
+* Python in noexec-land https://web.archive.org/web/20100720104659/http://dp.grhack.net/2009/09/17/python-in-noexec-land/
