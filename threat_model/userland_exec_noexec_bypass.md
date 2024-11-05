@@ -8,7 +8,7 @@ dd if=/dev/zero of=ro-partition.img bs=1M count=100
 mkfs.ext4 ro-partition.img 
 mkdir /mnt/ro-part
 mount -o loop,noexec ro-partition.img /mnt/ro-part/
-cd 
+cd /mnt/ro-part/
 git clone https://github.com/hackerschoice/memexec.git
 ```
 ### Build the binary:
@@ -112,10 +112,31 @@ PaX/GRsecurity is the only solution against this bypass technique. The vanilla L
 | Overwrite /proc/*/mem | PaX/GRsecurity enabled /proc/*/mem restriction since the beginning (2012?) |
 | memfd_* execution | 1) PaX/GRsecurity RBAC (doesn't require any policy) treat it as SHM_EXEC 2) PaX/GRsecurity TPE |
 
-Prevention log:
+Enable TPE ([Trusted Path Execution](https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Trusted_Path_Execution_(TPE))) w/o RBAC:
 ```
-Oct 31 15:50:37 newdevel kernel: [272707.761418] grsec: denied untrusted exec (due to not being in trusted group and file in non-root-owned directory) of / by /[perl:9099] uid/euid:1000/1000 gid/egid:1000/1000, parent /bin/bash[bash:9075] uid/euid:1000/1000 gid/egid:1000/1000
+ved@debian-vtest:/mnt/ro-part/memexec$ groupadd -g 1005 grsec_tpe
+ved@debian-vtest:/mnt/ro-part/memexec$ usermod -aG 1005 ved
 ```
+
+Have fun:
+```
+ved@debian-vtest:/mnt/ro-part/memexec$ source memexec-perl.sh
+ved@debian-vtest:/mnt/ro-part/memexec$ cat /bin/ls | TIME_STYLE=+%s memexec -lah
+==> RESULTs
+[   59.871267] grsec: denied untrusted exec (due to being in untrusted group and file in non-root-owned directory) of / by /[perl:1426] uid/euid:1000/1000 gid/egid:1000/1000, parent /usr/bin/bash[bash:1425] uid/euid:1000/1000 gid/egid:1000/1000
+
+ved@debian-vtest:/mnt/ro-part/memexec$ deluser ved grsec_tpe
+```
+
+Enable [RBAC](https://grsecurity.net/featureset/rbac) w/o TPE:
+```
+ved@debian-vtest:/mnt/ro-part/memexec$ gradm -E
+ved@debian-vtest:/mnt/ro-part/memexec$ source memexec-perl.sh
+ved@debian-vtest:/mnt/ro-part/memexec$ cat /bin/ls | TIME_STYLE=+%s memexec -lah
+==> RESULTs
+[  400.930022] grsec: (default:D:/) denied execution of / by /usr/bin/perl[perl:2168] uid/euid:1000/1000 gid/egid:1000/1000, parent /usr/bin/bash[bash:2167] uid/euid:1000/1000 gid/egid:1000/1000
+```
+
 ## Extra bonus from the legacy of 0ldsk00l hackers
 Let's say THC's approach as suitable for binary/backdoor execution. There's another [intriguing method](https://web.archive.org/web/20100720104659/http://dp.grhack.net/2009/09/17/python-in-noexec-land/) for bypassing the noexec restriction that primarily benefits exploit writers (s0rry, pentesters! This is not for you). GRHack introduced a technique to circumvent noexec by leveraging a feature in Python called Foreign Function Interface (FFI). This feature enables Python developers to directly invoke any C function from a shared object. You can bypass the noexec limitation by porting the exploit to Python. It's important to note that this approach specifically affects GNU/Linux systems, as [OpenBSD does not allow the loading of shared objects in noexec partitions](https://github.com/huku-/research/wiki/Sandboxing-and-isolation#212-mount-options). The PoC (run-ls.py) is simple as:
 
@@ -165,3 +186,5 @@ Return code: 0
 * userland exec for Linux x86_64 https://github.com/bediger4000/userlandexec
 * The Design and Implementation of Userland Exec https://grugq.github.io/docs/ul_exec.txt
 * Python in noexec-land https://web.archive.org/web/20100720104659/http://dp.grhack.net/2009/09/17/python-in-noexec-land/
+* https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Trusted_Path_Execution_(
+* https://grsecurity.net/featureset/rbac
