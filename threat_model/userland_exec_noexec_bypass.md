@@ -178,6 +178,15 @@ total 208
 -rw-r--r-- 1 ved ved   1442 Oct 30 16:43 test.s
 Return code: 0
 ```
+## userland-exec (C version) for x86 and arm64 (Updated: Jan 16 2025)
+[userland-exec](https://github.com/hardenedlinux/userland-exec) is a proof-of-concept (PoC) implementation that bypasses the noexec partition through userland execution. This PoC demonstrates how to bypass W ^ X, mprotect, and SELinux's execmem, providing a level of functionality comparable to THC's implementation while also supporting arm64. 
+
+![1](../pic/uexec-centos.png)
+
+To [mitigate the risks](https://github.com/hardenedlinux/grsecurity-101-tutorials/blob/master/threat_model/userland_exec_noexec_bypass.md#mitigation) associated with userland-exec, PaX/GRsecurity's TPE and RBAC have been effective in preventing THC's PoC and can similarly protect against userland-exec.
+
+## Wrap-up
+The security measures of embedded systems heavily rely on Mandatory Access Control (MAC) mechanisms like SELinux and AppArmor, as well as partitioning strategies such as read-only (RO) execution partitions and read-write (RW) partitions with no execution permissions. However, recent research has simplified bypass techniques, making it easier to bypass those security measures. As a result, embedded security engineers may need to rework their threat models. The key takeaway is that truly understanding how the system works and conducting thorough risk analyses based on exploitation techniques/vectors is far more challenging than blindly trust that pulling a few strings could get you the silver bullet. Either you are dumb or numb, the desert of the real won't change till you figure out how to dance with it. Simply put, runtime mitigation is inevitable.
 
 ## Reference
 * Bypassing noexec and executing arbitrary binaries https://iq.thc.org/bypassing-noexec-and-executing-arbitrary-binaries
@@ -186,5 +195,6 @@ Return code: 0
 * userland exec for Linux x86_64 https://github.com/bediger4000/userlandexec
 * The Design and Implementation of Userland Exec https://grugq.github.io/docs/ul_exec.txt
 * Python in noexec-land https://web.archive.org/web/20100720104659/http://dp.grhack.net/2009/09/17/python-in-noexec-land/
-* https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Trusted_Path_Execution_(
-* https://grsecurity.net/featureset/rbac
+* PaX/GRsecurity TPE: https://en.wikibooks.org/wiki/Grsecurity/Appendix/Grsecurity_and_PaX_Configuration_Options#Trusted_Path_Execution_(TPE)
+* PaX/GRsecurity RBAC: https://grsecurity.net/featureset/rbac
+* userland-exec for x86_64 and arm64: https://github.com/hardenedlinux/userland-exec
